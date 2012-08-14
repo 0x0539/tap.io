@@ -1,64 +1,65 @@
-exports.safelyAdvanceTests = {
-  setUp: function(callback){
+var assert = require('assert');
+
+describe('Engine#safelyAdvance', function(){
+  beforeEach(function(done){
     this.Engine = require('../lib/shared/engine.js').Engine;
-    this.Engine.calculateSafeZone = function(){ 
-      return null; 
-    };
-    callback();
-  },
-  testCalculateSafeZoneCalled: function(test){
-    test.expect(2);
+    this.Engine.calculateSafeZone = function(){ return null; };
+    this.Engine.calculateSafeAdvancePoint = function(){ return null; }
+    done();
+  });
+
+  it('should call calculateSafeZone', function(){
+    var called = 0;
+
     this.Engine.calculateSafeZone = function(state){
-      test.deepEqual(state, {vt: 2});
-      test.ok(true);
+      assert.deepEqual(state, {vt: 2});
+      called++;
     };
+
     this.Engine.safelyAdvance({vt: 2});
-    test.done();
-  },
-  testCalculateSafeAdvancePointCalled: function(test){
-    test.expect(2);
+
+    assert.equal(called, 1);
+  });
+
+  it('should call calculateSafeAdvancePoint', function(){
+    var called = 0;
     this.Engine.calculateSafeAdvancePoint = function(state){
-      test.equal(state, null);
-      test.ok(true);
+      assert.equal(state, null);
+      called++;
     };
     this.Engine.safelyAdvance({vt: 3});
-    test.done();
-  },
-  testSafelyAdvanceNotCalledWhenNoEventsAndNoSessions: function(test){
-    this.Engine.calculateSafeAdvancePoint = function(){ return null; };
+    assert.equal(called, 1);
+  });
 
-    // should not get called
+  it('should not call advanceTo when safe advance point is null', function(){
     this.Engine.advanceTo = function(state, safeAdvancePoint){
-      test.ok(false, 'advanceTo was called');
+      assert.ok(false);
     };
-
     this.Engine.safelyAdvance({vt: 2});
-    test.done();
-  },
-  testSafelyAdvanceNotCalledWhenCannotAdvance: function(test){
-    this.Engine.calculateSafeAdvancePoint = function(){ return 2; };
+  });
 
-    // should not get called
+  it('should not call advanceTo when safe advance point equals state vt', function(){
+    this.Engine.calculateSafeAdvancePoint = function(){
+      return 2;
+    };
     this.Engine.advanceTo = function(state, safeAdvancePoint){
-      test.ok(false, 'advanceTo was called');
+      assert.ok(false);
     };
-
     this.Engine.safelyAdvance({vt: 2});
-    test.done();
-  },
-  testSafelyAdvanceCalledWithCorrectAdvancePoint: function(test){
-    test.expect(2);
+  });
 
-    this.Engine.calculateSafeAdvancePoint = function(){ return 3; };
-
-    // should get called with ({vt: 2}, 3)
+  it('should call advanceTo when safe advance point is greater than state vt', function(){
+    var called = 0;
+    this.Engine.calculateSafeAdvancePoint = function(){
+      return 3;
+    };
     this.Engine.advanceTo = function(state, safeAdvancePoint){
-      test.equal(state.vt, 2);
-      test.equal(safeAdvancePoint, 3);
+      assert.deepEqual(state, {vt: 2});
+      assert.equal(safeAdvancePoint, 3);
+      called++;
     };
-
     this.Engine.safelyAdvance({vt: 2});
-    test.done();
-  }
+    assert.equal(called, 1);
+  });
 
-};
+});

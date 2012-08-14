@@ -1,24 +1,18 @@
-var Engine = require('../lib/shared/engine.js').Engine;
+var assert = require('assert');
 
-exports.safeAdvancePointTests = {
-  testGetsMinimumSafeZone: function(test){
-    var safeZone = {
-      0: 15,
-      1: 20,
-      5: 2 
-    };
+describe('Engine#calculateSafeAdvancePoint', function(){
+  beforeEach(function(done){
+    this.Engine = require('../lib/shared/engine.js').Engine;
+    done();
+  });
 
-    var safeAdvancePoint = Engine.calculateSafeAdvancePoint(safeZone);
+  it('should get the minimum safe zone', function(){
+    var safeAdvancePoint = this.Engine.calculateSafeAdvancePoint({0: 15, 1: 20, 5: 2});
+    assert.equal(safeAdvancePoint, 2);
+  });
 
-    test.equal(safeAdvancePoint, 2);
-    test.done();
-  },
-  testReturnsNullOnEmptySafeZone: function(test){
-    var safeZone = {};
-
-    var safeAdvancePoint = Engine.calculateSafeAdvancePoint(safeZone);
-
-    test.equal(safeAdvancePoint, null);
-    test.done();
-  }
-};
+  it('should return null with an empty safe zone', function(){
+    var safeAdvancePoint = this.Engine.calculateSafeAdvancePoint({});
+    assert.equal(safeAdvancePoint, null);
+  });
+});

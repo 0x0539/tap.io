@@ -19,6 +19,9 @@
       $('html').on('keyup', function(e){
         socket.emit('gameevent', {type: 'keyup', which: e.which});
       });
+      var heartbeatInterval = setInterval(function(){
+        socket.emit('heartbeat');
+      }, 10000);
     });
   </script>
 </body>

@@ -9,49 +9,52 @@ if(typeof exports == 'undefined')
   window.exports = {};
 
 // Engine namespace declaration
-exports.Engine = {};
+exports.Engine = {
+  plugins: []
+};
 
-exports.Engine.safelyAdvance = function(game){
+exports.Engine.calculateSafeZone = function(state){
   var safeZone = {};
 
-  for(var i = 0; i < game.sessionIds.length; i++){
-    var sessionId = game.sessionIds[i];
-    safeZone[sessionId] = game.vt;
+  // initialize for all sessions that connected before this vt but have not yet disconnected
+  for(var i = 0; i < state.sessionIds.length; i++)
+    safeZone[state.sessionIds[i]] = state.vt;
+
+  for(var i = 0; i < state.events.length; i++){
+    var event = state.events[i];
+    // if client disconnects, we can disregard them as we have already received all their messages
+    if(event.type == 'disconnect')
+      delete safeZone[event.data.sessionId];
+    else
+      safeZone[event.senderSessionId] = event.vt; // bump up the max vt for this session
   }
 
-  for(var i = 0; i < game.events.length; i++){
-    var event = game.events[i];
+  return safeZone;
+};
 
-    switch(event.type){
-      case 'disconnect':
-        safeZone[event.data.sessionId] = null;
-        break;
-      case 'gameevent':
-        safeZone[event.senderSessionId] = event.vt;
-        break;
-    }
-  }
+exports.Engine.calculateSafeAdvancePoint = function(state){
 
-  var advanceTo = null;
+  var safeZone = this.calculateSafeZone(state),
+      safeAdvancePoint = null;
 
+  // calculate min across all safe zones
   for(var sessionId in safeZone){
     var vt = safeZone[sessionId];
 
-    // null indicates user disconnected, we know we have all their messages
-    if(vt == null) 
-      continue;
-    else if(advanceTo == null)
-      advanceTo = vt;
-    else if(vt <= advanceTo)
-      advanceTo = vt;
+    if(safeAdvancePoint == null || vt < safeAdvancePoint)
+      safeAdvancePoint = vt;
   }
 
-  if(advanceTo <= game.vt){
-    console.log('not advancing');
-  }
-  else{
-    console.log('advancing from ' + game.vt + ' to ' + advanceTo);
-    this.advanceTo(game, advanceTo);
+  return safeAdvancePoint;
+};
+
+exports.Engine.safelyAdvance = function(state){
+
+  var safeAdvancePoint = this.calculateSafeAdvancePoint(state);
+
+  if(safeAdvancePoint != null && safeAdvancePoint > state.vt){
+    console.log('advancing from ' + state.vt + ' to ' + safeAdvancePoint);
+    this.advanceTo(state, safeAdvancePoint);
   }
 };
 
@@ -64,31 +67,21 @@ exports.Engine.spliceOut = function(array, element){
 };
 
 // applies events from game.events up to the specified time
-exports.Engine.advanceTo = function(game, advanceTo){
-  var firstKeep = null;
+exports.Engine.advanceTo = function(state, advanceTo){
 
-  // advance the game, keeping track of the events we have to remove
-  for(var i = 0; i < game.events.length; i++){
-    var event = game.events[i];
-    if(event.vt < advanceTo){
-      this.advance(game, event);
-    }
-    else{
-      firstKeep = i;
-      break; // optimizing, because events are in vt order
-    }
+  for(; state.vt < advanceTo; state.vt++){
+
+    for(var i = 0; i < this.plugins.length; i++)
+      this.plugins[i].update(state);
+
+    while(state.events[0].vt == state.vt)
+      this.handle(state, state.events.shift());
   }
-
-  // update the vt
-  game.vt = advanceTo;
-
-  // remove all events that were applied
-  game.events = firstKeep == null ? [] : game.events.splice(firstKeep);
 };
 
-exports.Engine.advance = function(game, event){
+exports.Engine.handle = function(state, event){
   try{
-    this.validate(game, event);
+    this.validate(state, event);
   }catch(error){
     console.log(error.toString());
     console.log(event);
@@ -97,22 +90,19 @@ exports.Engine.advance = function(game, event){
 
   switch(event.type){
     case 'connect':
-      game.sessionIds.push(event.data.sessionId);
-      game.sessionIds.sort();
+      state.sessionIds.push(event.data.sessionId);
+      state.sessionIds.sort();
       break;
     case 'disconnect':
-      game.sessionIds = this.spliceOut(game.sessionIds, event.data.sessionId);
-      game.sessionIds.sort();
-      break;
-    case 'gameevent':
-      break;
-    default:
-      console.log('what happened? got a game event with type ' + gameevent.type);
+      state.sessionIds = this.spliceOut(state.sessionIds, event.data.sessionId);
       break;
   }
+
+  for(var i = 0; i < this.plugins.length; i++)
+    this.plugins[i].handle(state, event);
 };
 
-exports.Engine.validate = function(game, event){
+exports.Engine.validate = function(state, event){
   if(event.data == null)
     throw new Error('event data missing');
   if(event.vt == null)
@@ -130,6 +120,16 @@ exports.Engine.validate = function(game, event){
         throw new Error('connect/disconnect sent for server?');
       break;
     case 'gameevent':
+      switch(event.data.type){
+        case 'keyup':
+          if(event.data.which == null)
+            throw new Error("got a bad keyup event: " + event.data.which);
+          break;
+        default:
+          throw new Error('unknown gameevent type ' + event.data.type);
+      }
+      break;
+    case 'heartbeat':
       break;
     default:
       throw new Error('invalid event type');

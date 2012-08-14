@@ -24,7 +24,7 @@ exports.Network = function(port){
     });
 
     socket.on('gameevent', function(event){
-      dis.emit('gameevent', event, sessionId);
+      dis.emit('gameevent', sessionId, event);
     });
 
   });

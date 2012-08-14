@@ -1,0 +1,25 @@
+<html>
+<head>
+</head>
+<body>
+  <script src="http://localhost:9585/socket.io/socket.io.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="http://localhost:3000/engine.js"></script>
+  <script type="text/javascript">
+    $(function(){
+      var socket = io.connect('http://localhost:9585');
+      socket.on('gamedata', function(data){
+        console.log('gamedata!');
+        console.log(data);
+      });
+      socket.on('gameevent', function(data){
+        console.log('gameevent!');
+        console.log(data);
+      });
+      $('html').on('keyup', function(e){
+        socket.emit('gameevent', {type: 'keyup', which: e.which});
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,8 +1,9 @@
-var assert = require('assert');
+var assert = require('assert'),
+    reload = require('./reload.js');
 
 describe('Engine#safelyAdvance', function(){
   beforeEach(function(done){
-    this.Engine = require('../lib/shared/engine.js').Engine;
+    this.Engine = reload.reload('../lib/shared/engine.js').Engine;
     this.Engine.calculateSafeZone = function(){ return null; };
     this.Engine.calculateSafeAdvancePoint = function(){ return null; }
     done();

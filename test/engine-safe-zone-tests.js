@@ -1,8 +1,9 @@
-var assert = require('assert');
+var assert = require('assert'),
+    reload = require('./reload.js');
 
 describe('Engine#calculateSafeZone', function(){
   beforeEach(function(done){
-    this.Engine = require('../lib/shared/engine.js').Engine;
+    this.Engine = reload.reload('../lib/shared/engine.js').Engine;
     done();
   });
 
@@ -12,7 +13,7 @@ describe('Engine#calculateSafeZone', function(){
       sessionIds: [1, 3], 
       events: []
     };
-
+    
     var safeZone = this.Engine.calculateSafeZone(state);
 
     assert.ok(safeZone.hasOwnProperty(1));

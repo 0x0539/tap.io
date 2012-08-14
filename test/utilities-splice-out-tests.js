@@ -1,8 +1,9 @@
-var assert = require('assert');
+var assert = require('assert'),
+    reload = require('./reload.js');
 
 describe('Utilities#spliceOut', function(){
   beforeEach(function(done){
-    this.Utilities = require('../lib/shared/utilities.js').Utilities;
+    this.Utilities = reload.reload('../lib/shared/utilities.js').Utilities;
     done();
   });
 

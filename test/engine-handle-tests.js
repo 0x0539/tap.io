@@ -85,10 +85,10 @@ describe('Engine#handle', function(){
     this.Engine.handle({}, {});
   });
 
-  describe('on a connect event', function(){
+  describe('on a startSession event', function(){
     it('should add the new session id to the sorted session id list', function(){
       var event = {
-            type: 'connect', 
+            type: 'startSession', 
             data: {
               sessionId: 3
             }
@@ -103,10 +103,10 @@ describe('Engine#handle', function(){
     });
   });
 
-  describe('on a disconnect event', function(){
+  describe('on a endSession event', function(){
     it('should remove the session id from the sorted session id list', function(){
       var event = {
-            type: 'disconnect',
+            type: 'endSession',
             data: {
               sessionId: 5 
             }

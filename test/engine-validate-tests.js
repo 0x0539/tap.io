@@ -20,13 +20,13 @@ describe('Engine#validate', function(){
     return {a: 2, b: 'abc'};
   };
 
-  // builds a base connect event to play with
+  // builds a base startSession event to play with
   var buildEvent = function(overrides){
     var returned = {
       data: {
         sessionId: 1
       }, 
-      type: 'connect', 
+      type: 'startSession', 
       vt: 2, 
       senderSessionId: 0
     }; 
@@ -115,11 +115,11 @@ describe('Engine#validate', function(){
 
   });
 
-  describe('disconnect events', function(){
-    // builds a disconnect event
-    var buildDisconnectEvent = function(overrides){
+  describe('endSession events', function(){
+    // builds a endSession event
+    var buildEndSessionEvent = function(overrides){
       var returned = buildEvent({
-            type: 'disconnect', 
+            type: 'endSession', 
             data: {
               sessionId: 1
             },
@@ -130,39 +130,39 @@ describe('Engine#validate', function(){
 
     it('should have a valid base', function(){
       var dis = this;
-      assert.equal(buildDisconnectEvent().type, 'disconnect');
+      assert.equal(buildEndSessionEvent().type, 'endSession');
       assert.doesNotThrow(function(){
-        dis.Engine.validate(buildState(), buildDisconnectEvent());
+        dis.Engine.validate(buildState(), buildEndSessionEvent());
       });
     });
 
     it('should reject if sender session id is nonzero', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildDisconnectEvent({senderSessionId: 1}));
+        dis.Engine.validate(buildState(), buildEndSessionEvent({senderSessionId: 1}));
       });
     });
 
     it('should reject if session id is 0', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildDisconnectEvent({data: {sessionId: 0}}));
+        dis.Engine.validate(buildState(), buildEndSessionEvent({data: {sessionId: 0}}));
       });
     });
 
     it('should reject if session id is missing', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildDisconnectEvent({data: {}}));
+        dis.Engine.validate(buildState(), buildEndSessionEvent({data: {}}));
       });
     });
   });
 
-  describe('connect events', function(){
-    // builds a connect event (overriding important fields in case base event type changes)
-    var buildConnectEvent = function(overrides){
+  describe('startSession events', function(){
+    // builds a startSession event (overriding important fields in case base event type changes)
+    var buildStartSessionEvent = function(overrides){
       var returned = buildEvent({
-            type: 'connect', 
+            type: 'startSession', 
             data: {
               sessionId: 1
             },
@@ -173,30 +173,30 @@ describe('Engine#validate', function(){
 
     it('should have a valid base', function(){
       var dis = this;
-      assert.equal(buildConnectEvent().type, 'connect');
+      assert.equal(buildStartSessionEvent().type, 'startSession');
       assert.doesNotThrow(function(){
-        dis.Engine.validate(buildState(), buildConnectEvent());
+        dis.Engine.validate(buildState(), buildStartSessionEvent());
       });
     });
 
     it('should reject if sender session id is nonzero', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildConnectEvent({senderSessionId: 1}));
+        dis.Engine.validate(buildState(), buildStartSessionEvent({senderSessionId: 1}));
       });
     });
 
     it('should reject if session id is 0', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildConnectEvent({data: {sessionId: 0}}));
+        dis.Engine.validate(buildState(), buildStartSessionEvent({data: {sessionId: 0}}));
       });
     });
 
     it('should reject if session id is missing', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildConnectEvent({data: {}}));
+        dis.Engine.validate(buildState(), buildStartSessionEvent({data: {}}));
       });
     });
   });

@@ -36,6 +36,7 @@ describe('Network', function(){
           sessionIdRegex = new RegExp('^[0-9]+-' + network.sessionIdCounter + '$');
       assert.ok(sessionIdRegex.test(network.getNextSessionId()));
     });
+
     it('should increment the sessionIdCounter variable', function(){
       var network = new this.Network(20239),
           before = network.sessionIdCounter;
@@ -87,7 +88,7 @@ describe('Network', function(){
       done();
     });
 
-    it('should emit a connect event and increment sessionIdCounter', function(){
+    it('should emit a startSession event and increment sessionIdCounter', function(){
       var calls = 0;
       var sessionId = 'awwwyeah';
 
@@ -98,7 +99,7 @@ describe('Network', function(){
 
       this.network.emit = function(type, inSessionId){
         calls++;
-        assert.equal('connect', type);
+        assert.equal('startSession', type);
         assert.equal(sessionId, inSessionId);
       };
       
@@ -143,10 +144,10 @@ describe('Network', function(){
           s2SessionId = null,
           calls = [];
 
-      this.network.emit = function(type, sessionId){ if(type == 'connect') s1SessionId = sessionId; };
+      this.network.emit = function(type, sessionId){ if(type == 'startSession') s1SessionId = sessionId; };
       this.network.onConnection(s1);
 
-      this.network.emit = function(type, sessionId){ if(type == 'connect') s2SessionId = sessionId; };
+      this.network.emit = function(type, sessionId){ if(type == 'startSession') s2SessionId = sessionId; };
       this.network.onConnection(s2);
 
       assert.ok(this.network.sockets.hasOwnProperty(s2SessionId));
@@ -155,7 +156,7 @@ describe('Network', function(){
       s2.callbacks.disconnect();
 
       assert.ok(!this.network.sockets.hasOwnProperty(s2SessionId));
-      assert.deepEqual(calls, [{type: 'disconnect', sessionId: s2SessionId}]);
+      assert.deepEqual(calls, [{type: 'endSession', sessionId: s2SessionId}]);
     });
 
     it('should handle a gameevent by firing a gameevent', function(){
@@ -166,10 +167,10 @@ describe('Network', function(){
           event = {a: 2, b: 3},
           calls = [];
 
-      this.network.emit = function(type, sessionId){ if(type == 'connect') s1SessionId = sessionId; };
+      this.network.emit = function(type, sessionId){ if(type == 'startSession') s1SessionId = sessionId; };
       this.network.onConnection(s1);
 
-      this.network.emit = function(type, sessionId){ if(type == 'connect') s2SessionId = sessionId; };
+      this.network.emit = function(type, sessionId){ if(type == 'startSession') s2SessionId = sessionId; };
       this.network.onConnection(s2);
 
       this.network.emit = function(type, sessionId, event){ 
@@ -188,10 +189,10 @@ describe('Network', function(){
           s2SessionId = null,
           calls = [];
 
-      this.network.emit = function(type, sessionId){ if(type == 'connect') s1SessionId = sessionId; };
+      this.network.emit = function(type, sessionId){ if(type == 'startSession') s1SessionId = sessionId; };
       this.network.onConnection(s1);
 
-      this.network.emit = function(type, sessionId){ if(type == 'connect') s2SessionId = sessionId; };
+      this.network.emit = function(type, sessionId){ if(type == 'startSession') s2SessionId = sessionId; };
       this.network.onConnection(s2);
 
       this.network.emit = function(type, sessionId){ 

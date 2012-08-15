@@ -22,12 +22,12 @@ describe('Engine#calculateSafeZone', function(){
     assert.equal(safeZone[3], 20);
   });
 
-  it('should remove disconnects', function(){
+  it('should remove endSessions', function(){
     var state = {
       vt: 10,
       sessionIds: [1, 3],
       events: [
-        {type: 'disconnect', data: {sessionId: 3}, vt: 20}
+        {type: 'endSession', data: {sessionId: 3}, vt: 20}
       ]
     };
 
@@ -59,13 +59,13 @@ describe('Engine#calculateSafeZone', function(){
     assert.equal(safeZone[4], 25);
   });
 
-  it('should add users to safe zone when a connect event is received', function(){
+  it('should add users to safe zone when a startSession event is received', function(){
     var state = {
       vt: 10,
       sessionIds: [2],
       events: [
         {type: 'gameevent', senderSessionId: 2, vt: 21},
-        {type: 'connect', data: {sessionId: 4}, vt: 22}
+        {type: 'startSession', data: {sessionId: 4}, vt: 22}
       ]
     };
 

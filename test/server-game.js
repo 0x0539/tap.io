@@ -39,7 +39,7 @@ describe('server/Game', function(){
 
   it('should register with all network events on construction', function(){
     var network = buildNetworkMock(),
-        eventTypes = {connect: true, disconnect: true, gameevent: true, heartbeat: true};
+        eventTypes = {startSession: true, endSession: true, gameevent: true, heartbeat: true};
 
     network.on = function(eventType, callback){
       assert.ok(eventTypes.hasOwnProperty(eventType));
@@ -114,7 +114,7 @@ describe('server/Game', function(){
       });
     });
 
-    it('should add disconnect events for all nonzero users', function(){
+    it('should add endSession events for all nonzero users', function(){
       var baseState = buildBaseState();
 
       assert.equal(baseState.events.length, 2);
@@ -122,12 +122,12 @@ describe('server/Game', function(){
       var game = new this.Game(buildNetworkMock(), baseState);
 
       assert.equal(baseState.events.length, 4);
-      assert.deepEqual(baseState.events[2], {type: 'disconnect', senderSessionId: 0, data: {sessionId: 1}, vt: game.state.clock});
-      assert.deepEqual(baseState.events[3], {type: 'disconnect', senderSessionId: 0, data: {sessionId: 2}, vt: game.state.clock});
+      assert.deepEqual(baseState.events[2], {type: 'endSession', senderSessionId: 0, data: {sessionId: 1}, vt: game.state.clock});
+      assert.deepEqual(baseState.events[3], {type: 'endSession', senderSessionId: 0, data: {sessionId: 2}, vt: game.state.clock});
     });
   });
 
-  describe('on network connect events', function(){
+  describe('on network startSession events', function(){
     it('should fire an event and then send gamedata', function(){
       var network = buildNetworkMock(),
           game = new this.Game(network),
@@ -151,13 +151,13 @@ describe('server/Game', function(){
         called.push('send');
       };
 
-      network.eventCallbacks['connect'](3);
+      network.eventCallbacks['startSession'](3);
 
       assert.deepEqual(called, ['fire', 'send']);
     });
   });
 
-  it('should call fire on disconnect events', function(){
+  it('should call fire on endSession events', function(){
     var network = buildNetworkMock(),
         game = new this.Game(network),
         called = 0,
@@ -173,7 +173,7 @@ describe('server/Game', function(){
       called++;
     };
 
-    network.eventCallbacks['disconnect'](4);
+    network.eventCallbacks['endSession'](4);
 
     assert.equal(called, 1);
   });

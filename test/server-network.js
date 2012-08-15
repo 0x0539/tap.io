@@ -30,6 +30,20 @@ describe('Network', function(){
     done();
   });
 
+  describe('#getNextSessionId', function(){
+    it('should generate an id starting with a unix date and ending with current sessionIdCounter', function(){
+      var network = new this.Network(20239),
+          sessionIdRegex = new RegExp('^[0-9]+-' + network.sessionIdCounter + '$');
+      assert.ok(sessionIdRegex.test(network.getNextSessionId()));
+    });
+    it('should increment the sessionIdCounter variable', function(){
+      var network = new this.Network(20239),
+          before = network.sessionIdCounter;
+      network.getNextSessionId();
+      assert.equal(before + 1, network.sessionIdCounter);
+    });
+  });
+
   describe('#start', function(){
     beforeEach(function(done){
       this.network = new this.Network(2020);

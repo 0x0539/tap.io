@@ -150,10 +150,10 @@ describe('Engine#validate', function(){
       });
     });
 
-    it('should reject if session id is nonnumeric', function(){
+    it('should reject if session id is missing', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildDisconnectEvent({data: {sessionId: 'abc'}}));
+        dis.Engine.validate(buildState(), buildDisconnectEvent({data: {}}));
       });
     });
   });
@@ -193,10 +193,10 @@ describe('Engine#validate', function(){
       });
     });
 
-    it('should reject if session id is nonnumeric', function(){
+    it('should reject if session id is missing', function(){
       var dis = this;
       assert.throws(function(){
-        dis.Engine.validate(buildState(), buildConnectEvent({data: {sessionId: 'abc'}}));
+        dis.Engine.validate(buildState(), buildConnectEvent({data: {}}));
       });
     });
   });

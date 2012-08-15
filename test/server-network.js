@@ -75,7 +75,12 @@ describe('Network', function(){
 
     it('should emit a connect event and increment sessionIdCounter', function(){
       var calls = 0;
-      var sessionId = this.network.sessionIdCounter;
+      var sessionId = 'awwwyeah';
+
+      // mock out getNextSessionId
+      this.network.getNextSessionId = function(){
+        return 'awwwyeah';
+      };
 
       this.network.emit = function(type, inSessionId){
         calls++;
@@ -96,7 +101,13 @@ describe('Network', function(){
 
     it('should add a socket with the correct id to the sockets array', function(){
       var mock = buildSocketMock(),
-          sessionId = this.network.sessionIdCounter;
+          sessionId = 'crazay';
+
+      // mock out getNextSessionId
+      this.network.getNextSessionId = function(){
+        return sessionId;
+      };
+
       this.network.onConnection(mock);
       assert.equal(mock, this.network.sockets[sessionId]);
     });

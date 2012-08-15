@@ -22,6 +22,15 @@ describe('server/Game', function(){
     new this.Game(buildNetworkMock());
   });
 
+  it('should not allow an empty or null network', function(){
+    assert.throws(function(){
+      new this.Game();
+    });
+    assert.throws(function(){
+      new this.Game(null);
+    });
+  });
+
   it('should register with all network events on construction', function(){
     var network = buildNetworkMock(),
         eventTypes = {connect: true, disconnect: true, gameevent: true, heartbeat: true};

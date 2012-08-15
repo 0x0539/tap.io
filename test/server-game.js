@@ -140,6 +140,19 @@ describe('server/Game', function(){
     });
   });
 
+  describe('#start and #stop', function(){
+    it('should create a loop and a heartbeat interval', function(){
+      var game = new this.Game(buildNetworkMock());
+      assert.equal(typeof game.heartbeatInterval, 'undefined');
+      assert.equal(typeof game.gameLoopInterval, 'undefined');
+      game.start();
+      assert.equal(typeof game.heartbeatInterval, 'object');
+      assert.equal(typeof game.gameLoopInterval, 'object');
+      clearInterval(game.heartbeatInterval);
+      clearInterval(game.gameLoopInterval);
+    });
+  });
+
   describe('#fire', function(){
     it('should require a type', function(){
       var game = new this.Game(buildNetworkMock());

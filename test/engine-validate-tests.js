@@ -17,7 +17,7 @@ describe('Engine#validate', function(){
 
   // at the time of writing, no validations look at the state, so this is stubbed
   var buildState = function(){
-    return {};
+    return {a: 2, b: 'abc'};
   };
 
   // builds a base connect event to play with
@@ -66,6 +66,53 @@ describe('Engine#validate', function(){
     assert.throws(function(){
       dis.Engine.validate(buildState(), buildEvent({type: null}));
     });
+  });
+
+  it('should call validate for all plugins', function(){
+    var state = buildState(),
+        event = buildEvent(),
+        called1 = 0,
+        called2 = 0;
+
+    this.Engine.plugins.push({
+      validate: function(inState, inEvent){
+        assert.deepEqual(state, inState);
+        assert.deepEqual(event, inEvent);
+        called1++;
+      }
+    });
+
+    this.Engine.plugins.push({
+      validate: function(inState, inEvent){
+        assert.deepEqual(state, inState);
+        assert.deepEqual(event, inEvent);
+        called2++;
+      }
+    });
+
+    this.Engine.validate(state, event);
+
+    assert.equal(called1, 1);
+    assert.equal(called2, 1);
+  });
+
+  it('should pass plugin validation errors', function(){
+    var dis = this;
+
+    assert.doesNotThrow(function(){
+      dis.Engine.validate(buildState(), buildEvent());
+    });
+
+    this.Engine.plugins.push({
+      validate: function(state, event){
+        throw new Error('booyah');
+      }
+    });
+
+    assert.throws(function(){
+      dis.Engine.validate(buildState(), buildEvent());
+    });
+
   });
 
   describe('disconnect events', function(){
@@ -150,51 +197,6 @@ describe('Engine#validate', function(){
       var dis = this;
       assert.throws(function(){
         dis.Engine.validate(buildState(), buildConnectEvent({data: {sessionId: 'abc'}}));
-      });
-    });
-  });
-
-  describe('keyup events', function(){
-    var buildKeyupEvent = function(overrides){
-      var returned = buildEvent({
-            type: 'gameevent',
-            data: {
-              type: 'keyup',
-              which: 20
-            }
-          });
-      return merge(returned, overrides);
-    };
-
-    it('should have a valid base', function(){
-      var dis = this;
-      assert.equal(buildKeyupEvent().type, 'gameevent');
-      assert.equal(buildKeyupEvent().data.type, 'keyup');
-      assert.doesNotThrow(function(){
-        dis.Engine.validate(buildState(), buildKeyupEvent());
-      });
-    });
-
-    it('should require a data.which', function(){
-      var dis = this;
-      assert.throws(function(){
-        dis.Engine.validate(buildState(), buildKeyupEvent({data: {type: 'keyup'}}));
-      });
-    });
-
-    it('should not allow nonnumeric data.which', function(){
-      var dis = this;
-      assert.throws(function(){
-        dis.Engine.validate(buildState(), buildKeyupEvent({data: {type: 'keyup', which: 'abc'}}));
-      });
-    });
-  });
-
-  describe('other gameevent events', function(){
-    it('should raise an error', function(){
-      var dis = this;
-      assert.throws(function(){
-        dis.Engine.validate(buildState(), buildEvent({type: 'gameevent'}));
       });
     });
   });

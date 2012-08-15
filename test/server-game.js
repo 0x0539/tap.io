@@ -1,5 +1,7 @@
 var assert = require('assert'),
-    reload = require('./reload.js');
+    reload = require('./reload.js'),
+    Utilities = require('../lib/shared/utilities.js').Utilities,
+    Parameters = require('../lib/shared/parameters.js').Parameters;
 
 describe('server/Game', function(){
   var buildNetworkMock = function(){
@@ -122,8 +124,8 @@ describe('server/Game', function(){
       var game = new this.Game(buildNetworkMock(), baseState);
 
       assert.equal(baseState.events.length, 4);
-      assert.deepEqual(baseState.events[2], {type: 'endSession', senderSessionId: 0, data: {sessionId: 1}, vt: game.state.clock + 16});
-      assert.deepEqual(baseState.events[3], {type: 'endSession', senderSessionId: 0, data: {sessionId: 2}, vt: game.state.clock + 16});
+      assert.deepEqual(baseState.events[2], {type: 'endSession', senderSessionId: 0, data: {sessionId: 1}, vt: game.state.clock + Utilities.ms2ticks(Parameters.eventDelayMillis)});
+      assert.deepEqual(baseState.events[3], {type: 'endSession', senderSessionId: 0, data: {sessionId: 2}, vt: game.state.clock + Utilities.ms2ticks(Parameters.eventDelayMillis)});
     });
   });
 
@@ -299,7 +301,7 @@ describe('server/Game', function(){
 
       var event = game.buildEvent(type, senderSessionId, data);
 
-      assert.deepEqual(event, {type: type, senderSessionId: senderSessionId, data: data, vt: game.state.clock + 16});
+      assert.deepEqual(event, {type: type, senderSessionId: senderSessionId, data: data, vt: game.state.clock + Utilities.ms2ticks(Parameters.eventDelayMillis)});
     });
   });
 

@@ -130,7 +130,7 @@ describe('server/Game', function(){
   });
 
   describe('on network startSession events', function(){
-    it('should fire an event and then send gamedata', function(){
+    it('should fire an event and then send bootstrap', function(){
       var network = buildNetworkMock(),
           game = new this.Game(network),
           called = [],
@@ -148,8 +148,8 @@ describe('server/Game', function(){
 
       network.send = function(sessionId, type, data){
         assert.equal(sessionId, 3);
-        assert.equal('gamedata', type);
-        assert.deepEqual(game.state, data);
+        assert.equal('bootstrap', type);
+        assert.deepEqual({state: game.state, sessionId: sessionId}, data);
         called.push('send');
       };
 

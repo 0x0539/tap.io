@@ -46,39 +46,49 @@ describe('server/Game', function(){
     assert.deepEqual({}, eventTypes);
   });
 
-  it('should call fire and then send gamedata on network connect events', function(){
-    var network = buildNetworkMock(),
-        game = new this.Game(network),
-        called = [];
+  describe('on network connect events', function(){
+    it('should fire an event and then send gamedata', function(){
+      var network = buildNetworkMock(),
+          game = new this.Game(network),
+          called = [],
+          event = {a: 2, b: 'abc'};
 
-    game.fire = function(type, senderSessionId, data){
-      assert.equal(type, 'connect');
-      assert.equal(senderSessionId, 0);
-      assert.deepEqual(data, {sessionId: 3});
-      called.push('fire');
-    };
+      // mock out buildEvent
+      game.buildEvent = function(){ 
+        return event; 
+      };
 
-    network.send = function(sessionId, type, data){
-      assert.equal(sessionId, 3);
-      assert.equal('gamedata', type);
-      assert.deepEqual(game.state, data);
-      called.push('send');
-    };
+      game.fire = function(inEvent){
+        assert.deepEqual(inEvent, event);
+        called.push('fire');
+      };
 
-    network.eventCallbacks['connect'](3);
+      network.send = function(sessionId, type, data){
+        assert.equal(sessionId, 3);
+        assert.equal('gamedata', type);
+        assert.deepEqual(game.state, data);
+        called.push('send');
+      };
 
-    assert.deepEqual(called, ['fire', 'send']);
+      network.eventCallbacks['connect'](3);
+
+      assert.deepEqual(called, ['fire', 'send']);
+    });
   });
 
   it('should call fire on disconnect events', function(){
     var network = buildNetworkMock(),
         game = new this.Game(network),
-        called = 0;
+        called = 0,
+        event = {abc: 2, a: [1, 3, 'a']};
 
-    game.fire = function(type, senderSessionId, data){
-      assert.equal(type, 'disconnect');
-      assert.equal(senderSessionId, 0);
-      assert.deepEqual(data, {sessionId: 4});
+    // mock out buildEvent
+    game.buildEvent = function(){
+      return event;
+    };
+
+    game.fire = function(inEvent){
+      assert.deepEqual(event, inEvent);
       called++;
     };
 
@@ -91,16 +101,19 @@ describe('server/Game', function(){
     var network = buildNetworkMock(),
         game = new this.Game(network),
         called = 0,
-        eventData = {'gobbledey': ['gook', {'a': 2}], 'c': 3};
+        event = {'gobbledey': ['gook', {'a': 2}], 'c': 3};
 
-    game.fire = function(type, senderSessionId, data){
-      assert.equal(type, 'gameevent');
-      assert.equal(senderSessionId, 3);
-      assert.deepEqual(eventData, data);
+    // mock out buildEvent
+    game.buildEvent = function(){
+      return event;
+    };
+
+    game.fire = function(inEvent){
+      assert.deepEqual(inEvent, event);
       called++;
     };
 
-    network.eventCallbacks['gameevent'](3, eventData);
+    network.eventCallbacks['gameevent'](3, 3);
 
     assert.equal(called, 1);
   });
@@ -108,12 +121,16 @@ describe('server/Game', function(){
   it('should call fire on heartbeats', function(){
     var network = buildNetworkMock(),
         game = new this.Game(network),
+        event = {'blah': [1, 2], b: 2},
         called = 0;
 
-    game.fire = function(type, senderSessionId, data){
-      assert.equal(type, 'heartbeat');
-      assert.equal(senderSessionId, 3);
-      assert.equal(data, null);
+    // mock out buildEvent
+    game.buildEvent = function(){
+      return event;
+    };
+
+    game.fire = function(inEvent){
+      assert.deepEqual(inEvent, event);
       called++;
     };
 
@@ -125,11 +142,11 @@ describe('server/Game', function(){
   describe('#loop', function(){
     it('should increment the virtual clock by 1', function(){
       var game = new this.Game(buildNetworkMock()),
-          clock = game.clock;
+          clock = game.state.clock;
 
       game.loop();
 
-      assert.equal(clock + 1, game.clock);
+      assert.equal(clock + 1, game.state.clock);
     });
 
     it('should call Engine.safelyAdvance with game state', function(){
@@ -162,51 +179,64 @@ describe('server/Game', function(){
     });
   });
 
-  describe('#fire', function(){
+  describe('#buildEvent', function(){
     it('should require a type', function(){
       var game = new this.Game(buildNetworkMock());
       assert.throws(function(){
-        game.fire(null, 29);
+        game.buildEvent(null, 29);
       });
     });
 
     it('should require a senderSessionId', function(){
       var game = new this.Game(buildNetworkMock());
       assert.throws(function(){
-        game.fire('heartbeat', null);
+        game.buildEvent('heartbeat', null);
       });
     });
 
+    it('should return an event', function(){
+      var game = new this.Game(buildNetworkMock()),
+          type = 'heartbeat',
+          senderSessionId = 28,
+          data = {a: 2, b: 'abc'};
+
+      var event = game.buildEvent(type, senderSessionId, data);
+
+      assert.deepEqual(event, {
+        type: type,
+        senderSessionId: senderSessionId,
+        data: data,
+        vt: game.state.clock,
+      });
+    });
+  });
+
+  describe('#fire', function(){
     it('should push an event onto state.events and broadcast that event', function(){
       var network = buildNetworkMock(),
           game = new this.Game(network),
-          type = 'heartbeat',
-          senderSessionId = 3,
-          data = 'gabbl',
           event = {
-            type: type,
-            data: data,
-            senderSessionId: senderSessionId,
-            vt: game.clock
+            type: 'heartbeat',
+            data: 'gabbl',
+            senderSessionId: 3,
+            vt: game.state.clock
           },
           called = 0;
 
       network.broadcast = function(inType, inEvent){
-        assert.equal(type, inType);
+        assert.equal(event.type, inType);
         assert.deepEqual(event, inEvent);
         called++;
       };
 
       assert.equal(game.state.events.length, 0);
 
-      game.fire(type, senderSessionId, data);
+      game.fire(event);
 
       assert.equal(game.state.events.length, 1);
       assert.deepEqual(game.state.events[0], event);
       assert.equal(called, 1);
     });
-
-
   });
 
 });

@@ -19,7 +19,13 @@ describe('server/Game', function(){
   });
 
   it('should construct without exceptions using the base network mock', function(){
-    new this.Game(buildNetworkMock());
+    var game = new this.Game(buildNetworkMock());
+    assert.deepEqual(game.state, {
+      clock: 0,
+      vt: 0,
+      events: [],
+      sessionIds: [0]
+    });
   });
 
   it('should not allow an empty or null network', function(){
@@ -44,6 +50,81 @@ describe('server/Game', function(){
     new this.Game(network);
 
     assert.deepEqual({}, eventTypes);
+  });
+
+  describe('with state passed in', function(){
+    var buildBaseState = function(){
+      return {
+        vt: 3,
+        events: [{a: 2}, {b: 3}],
+        clock: 5,
+        sessionIds: [0, 1, 2]
+      };
+    };
+
+    it('should have a valid base test', function(){
+      var baseState = buildBaseState(),
+          game = new this.Game(buildNetworkMock(), baseState);
+
+      // we just want to show that the data object itself is used, knowing it may be modified
+      assert.deepEqual(game.state, baseState);
+    });
+
+    it('should raise an error if vt is undefined', function(){
+      var baseState = buildBaseState(),
+          dis = this;
+
+      baseState.vt = null;
+
+      assert.throws(function(){
+        new dis.Game(buildNetworkMock(), baseState);
+      });
+    });
+
+    it('should raise an error if events is undefined', function(){
+      var baseState = buildBaseState(),
+          dis = this;
+
+      baseState.events = null;
+
+      assert.throws(function(){
+        new dis.Game(buildNetworkMock(), baseState);
+      });
+    });
+
+    it('should raise an error if clock is undefined', function(){
+      var baseState = buildBaseState(),
+          dis = this;
+
+      baseState.clock = null;
+
+      assert.throws(function(){
+        new dis.Game(buildNetworkMock(), baseState);
+      });
+    });
+
+    it('should raise an error if clock is undefined', function(){
+      var baseState = buildBaseState(),
+          dis = this;
+
+      baseState.sessionIds = null;
+
+      assert.throws(function(){
+        new dis.Game(buildNetworkMock(), baseState);
+      });
+    });
+
+    it('should add disconnect events for all nonzero users', function(){
+      var baseState = buildBaseState();
+
+      assert.equal(baseState.events.length, 2);
+
+      var game = new this.Game(buildNetworkMock(), baseState);
+
+      assert.equal(baseState.events.length, 4);
+      assert.deepEqual(baseState.events[2], {type: 'disconnect', senderSessionId: 0, data: {sessionId: 1}, vt: game.state.clock});
+      assert.deepEqual(baseState.events[3], {type: 'disconnect', senderSessionId: 0, data: {sessionId: 2}, vt: game.state.clock});
+    });
   });
 
   describe('on network connect events', function(){

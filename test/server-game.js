@@ -223,13 +223,15 @@ describe('server/Game', function(){
   });
 
   describe('#loop', function(){
-    it('should increment the virtual clock by 1', function(){
+    it('should increment the virtual clock by at least 1', function(){
       var game = new this.Game(buildNetworkMock()),
           clock = game.state.clock;
 
+      game.nextIteration = Date.now() - game.Parameters.vtPeriodInMillis * 2;
+
       game.loop();
 
-      assert.equal(clock + 1, game.state.clock);
+      assert.ok(game.state.clock > clock);
     });
 
     it('should call Engine.safelyAdvance with game state', function(){

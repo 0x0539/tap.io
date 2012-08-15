@@ -247,7 +247,7 @@ describe('server/Game', function(){
     });
   });
 
-  describe('#start and #stop', function(){
+  describe('#start', function(){
     it('should create a loop and a heartbeat interval', function(){
       var game = new this.Game(buildNetworkMock());
       assert.equal(typeof game.heartbeatInterval, 'undefined');
@@ -257,6 +257,22 @@ describe('server/Game', function(){
       assert.equal(typeof game.gameLoopInterval, 'object');
       clearInterval(game.heartbeatInterval);
       clearInterval(game.gameLoopInterval);
+    });
+
+    it('should complain if Parameters.vtPeriodInMillis is undefined', function(){
+      var game = new this.Game(buildNetworkMock());
+      game.Parameters = {};
+      assert.throws(function(){
+        game.start();
+      });
+    });
+
+    it('should complain if Parameters.vtPeriodInMillis is not a number', function(){
+      var game = new this.Game(buildNetworkMock());
+      game.Parameters = {vtPeriodInMillis: 'abc'};
+      assert.throws(function(){
+        game.start();
+      });
     });
   });
 

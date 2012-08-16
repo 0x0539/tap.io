@@ -3,7 +3,7 @@ var HTTP = require('http'),
     FS = require('fs'),
     EJS = require('ejs');
 
-var EjsParameters = {
+var Parameters = {
   baseurl: 'http://localhost:7787',
   socketio: 'http://localhost:9585',
   scripts: [
@@ -11,6 +11,7 @@ var EjsParameters = {
     '/lib/shared/engine.js',
     '/lib/shared/parameters.js',
     '/lib/shared/snake-engine.js',
+    '/lib/client/raf.js',
     '/lib/client/game.js',
     '/lib/client/renderer.js',
     '/lib/client/snake-renderer.js',
@@ -30,7 +31,7 @@ var testRoute = function(route, path){
         return true;
   }
   else{
-    throw new Error('route is of invalid type');
+    throw new Error('misconfigured route: ' + route);
   }
 };
 
@@ -38,7 +39,7 @@ var getRouteHandlerFor = function(path){
   for(var name in routes)
     if(testRoute(routes[name], path))
       return handlers[name];
-  throw new Error('no available handler for ' + path);
+  throw new Error('unroutable request: ' + path);
 };
 
 var respondWith = function(response, status, contentType, data){
@@ -65,7 +66,7 @@ var respondWithFile = function(path, response, contentType, map){
       });
     }
     else{
-      respondWith(response, 400, 'text/plain', 'requested path was not a file');
+      respondWith(response, 404, 'text/plain', 'Error: resource is not a file');
     }
   });
 };
@@ -73,31 +74,35 @@ var respondWithFile = function(path, response, contentType, map){
 var handlers = {
   home: function(request, response){
     respondWithFile('./home.html.ejs', response, 'text/html', function(data){
-      return EJS.render(data, EjsParameters);
+      return EJS.render(data, Parameters);
     });
   },
-  file: function(request, response){
+  jsfile: function(request, response){
     var url = URL.parse(request.url),
         path = url.pathname;
-    respondWithFile('.' + path, response);
+    respondWithFile('.' + path, response, 'text/javascript');
   }
 };
 
 
 var routes = {
-  "home": /^\/$/,
-  "file": [
-    /^\/lib\/shared\/[a-zA-Z0-9_-]*\.js$/,
-    /^\/lib\/client\/[a-zA-Z0-9_-]*\.js$/,
-    "/favicon.ico"
-  ],
+  "home": "/",
+  "jsfile": Parameters.scripts
 };
+
 var server = HTTP.createServer(function(request, response){
   try{
-    getRouteHandlerFor(URL.parse(request.url).pathname)(request, response);
+    var handler = getRouteHandlerFor(URL.parse(request.url).pathname);
   }
   catch(error){
-    respondWith(response, 500, 'text/plain', 'could not satisfy your request');
+    respondWith(response, 404, 'text/plain', error.toString());
+  }
+
+  try{
+    handler(request, response);
+  }
+  catch(error){
+    respondWith(response, 500, 'text/plain', error.toString());
   }
 });
 

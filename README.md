@@ -9,10 +9,11 @@ can use anything (WebGL, canvas, jQuery) to render the game.
 
 Features
 ========
+
 Here are some of the features I am striving for:
 
-Clean API
----------
+### Clean API
+
 When developing on tap.io, you will implement two things:
 
 1. Game Engine Extension - physics, event handling implementation (client and server)
@@ -21,18 +22,15 @@ When developing on tap.io, you will implement two things:
 For more information, see the Game Engine Extension and Rendering Engine Extension sections below.
 
 
-Shared Code Between Server and Client
--------------------------------------
-The 
+### Shared Code Between Server and Client
 
-Efficient Bandwidth Use
------------------------
+### Efficient Bandwidth Use
 
-Large Test Suite
-----------------
+### Large Test Suite
 
 Game Engine Extension
 =====================
+
 The game engine extension is javascript code that is shared between client and server. It contains the logic
 of your game (*deterministic* physics and event handling). Here is a skeleton example:
 
@@ -58,10 +56,10 @@ exports.SnakeEngine = (function(){
 })();
 ```
 
-The extension api is broken down into three functions:
+The game engine extension api is broken down into three functions:
 
-The update(state) function
---------------------------
+### update(state)
+
 This function should perform an *in place* update of the state object, according to the rules of your game. That
 means, for example, it could contain code like the following:
 
@@ -75,8 +73,8 @@ Note, it is crucial that the results of this function are deterministic! That me
 used to determine the progression of the state. If you want random events or anything like that, you should use
 events.
 
-The handle(state, event) function
----------------------------------
+### handle(state, event)
+
 This function should process the given event and alter the state according to the mechanics of your game. For example,
 if your game has a *spawnMonster* event, your code might look like this:
 
@@ -89,6 +87,7 @@ This code should also be deterministic.
 
 Rendering Engine Extension
 ==========================
+
 The rendering engine is how your game actually shows up in the browser. You will need to 'subclass' the Renderer 
 class on the client. Here is an example that renders some internals of the game to a page with every render loop:
 
@@ -137,3 +136,17 @@ window.SnakeRenderer = (function(){
   
 })();
 ```
+
+The interface basically amounts to two things:
+
+1. invoking the superclass (Renderer) constructor with the game state
+2. implementing render
+
+The render function should actually render the ```this.game.projectedState``` data, which is an
+optimistic, real-time view of the current state. It may be inconsistent at the time of rendering due
+to high-latency connections (which is why I used the term optimistic), but those inconsistencies 
+will be corrected by the engine as soon as possible. 
+
+Internally, this works by maintaining a separate copy of the game state; a past state that is known 
+to be consistent, as well as all events received since. That other copy only gets 'bumped forward' when
+we can guarantee that we have received all events that occurred before it, on the virtual timeline.

@@ -67,21 +67,26 @@ exports.SnakeEngine = (function(){
 
   var SnakeEngine = {};
 
-  // handle game physics deterministally
-  SnakeEngine.update = function(state){ };
+  SnakeEngine.update = function(state){ 
+    // handle game physics deterministally
+  };
 
-  // handle a single event
-  SnakeEngine.handle = function(state, event){ };
+  
+  SnakeEngine.handle = function(state, event){ 
+    // handle a single event deterministically
+  };
 
-  // validate the event, throw exception if invalid (used to enforce security policies, etc)
-  SnakeEngine.validate = function(state, event){ };
+  
+  SnakeEngine.validate = function(state, event){ 
+    // validate an event, throw exception if invalid (used to enforce security policies, etc)
+  };
 
   return SnakeEngine;
 
 })();
 ```
 
-The game engine extension api is broken down into three functions:
+The game engine extension api is broken down into three functions.
 
 ### update(state)
 
@@ -109,6 +114,12 @@ if(event.data.type == 'spawnMonster')
 ```
 
 This code should also be deterministic.
+
+### validate(state, event)
+
+This function should throw an exception if **event** is invalid, given the **state**. This can be used to prevent users
+from modifying eachothers positions (by checking **event.senderSessionId** against **event.data.playerId**, for example).
+I will detail the structure of event objects when the API has solidified.
 
 Rendering Engine Extension
 ==========================

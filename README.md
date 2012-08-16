@@ -10,7 +10,33 @@ can use anything (WebGL, canvas, jQuery) to render the game.
 Features
 ========
 
-Here are some of the features I am striving for:
+Here are some of the features tap.io is striving for:
+
+### Shared Code Between Server and Client
+
+A great deal of the codebase is shared between server and client (see /lib/shared). This 
+includes the core game engine and just about everything except rendering (client-only) 
+and networking (client and server function differently).
+
+This means reliable results and keeps the labor costs of writing tests down.
+
+### Efficient Use of Bandwidth
+
+In theory, the only communication between server and client are tiny event messages from clients 
+(such as keyboard input events) and server-side events such as spawning monsters. That, of course, 
+does not count resources that have to be downloaded on client initialization.
+
+### State as Pure Data
+
+The state of the game is represented as pure data, and the game engine as stateless functions that
+operate on that data. This clean separation allows us to do tricky things like update a client by
+sending them a single JSON object without worrying about serialization, etc. It also means we can
+persist the game state on disk in human readable form.
+
+It is possible that users will be able to exploit the human-readability of game data. For example, you could
+find out which chest to open merely by running a ```console.log(game.state.whereDatGold)``` in the javascript 
+console. That problem may need to be solved by exposing other API's for the game, though I certainly hope
+another solution presents itself.
 
 ### Clean API
 
@@ -19,14 +45,13 @@ When developing on tap.io, you will implement two things:
 1. Game Engine Extension - physics, event handling implementation (client and server)
 2. Rendering Engine Extension - state rendering (client only)
 
-For more information, see the Game Engine Extension and Rendering Engine Extension sections below.
-
-
-### Shared Code Between Server and Client
-
-### Efficient Bandwidth Use
+There are well-defined interfaces for both. For details, see the Game Engine Extension 
+and Rendering Engine Extension sections below.
 
 ### Large Test Suite
+
+I aim to provide a large amount of test coverage for this platform (though it seems like a given in these
+days of TDD).
 
 Game Engine Extension
 =====================

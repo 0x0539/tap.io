@@ -61,4 +61,10 @@ describe('Engine#advanceTo', function(){
     assert.deepEqual(callVts, []);
   });
 
+  it('should safely advance without events', function(){
+    var state = {vt: 1, events: []};
+
+    this.Engine.advanceTo(state, 5);
+  });
+
 });

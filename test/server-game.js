@@ -155,7 +155,7 @@ describe('server/Game', function(){
 
       network.eventCallbacks['startSession'](3);
 
-      assert.deepEqual(called, ['fire', 'send']);
+      assert.deepEqual(called, ['send', 'fire']);
     });
   });
 

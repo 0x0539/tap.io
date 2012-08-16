@@ -117,9 +117,8 @@ This code should also be deterministic.
 
 ### validate(state, event)
 
-This function should throw an exception if **event** is invalid, given the **state**. This can be used to prevent users
-from modifying eachothers positions (by checking **event.senderSessionId** against **event.data.playerId**, for example).
-I will detail the structure of event objects when the API has solidified.
+This function should throw an exception if **event** is invalid, given the **state**. This can be used, for example, to prevent users
+from modifying eachothers positions by checking **event.senderSessionId** against **event.data.playerId**.
 
 Rendering Engine Extension
 ==========================

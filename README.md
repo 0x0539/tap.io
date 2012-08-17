@@ -180,7 +180,7 @@ window.SnakeRenderer = (function(){
 
 The interface basically amounts to two things:
 
-1. invoking the superclass (Renderer) constructor with the game state
+1. invoking the superclass (Renderer) constructor with the Game object
 2. implementing render
 
 The render function should actually render the ```this.game.projectedState``` data, which is an

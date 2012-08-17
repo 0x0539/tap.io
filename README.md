@@ -184,11 +184,11 @@ The interface basically amounts to two things:
 2. implementing render
 
 The render function should render ```this.game.projectedState```, which is an
-optimistic, real-time view of the current state. It is optimistic because the projected state
+*optimistic*, *real-time* view of the current state. It is *optimistic* because the projected state
 may be inconsistent with other clients. Inconsistencies in projected states occur when events are received that
-have virtual timestamps less than the current virtual clock (which moves forward at ~30 ticks per second). 
-It is real-time because the projected state is our best guess at what the true state is at the current virtual clock. Remember,
-we might not have received all events that were timestamped with times less than the current virtual clock.
+have virtual timestamps less than virtual clock time (which moves forward at ~30 ticks per second). 
+It is *real-time* because the projected state is our best guess at what the true state is at virtual clock time. Remember,
+we might not yet have received all events with virtual timestamps less than virtual clock time.
 
 Internally, this works by maintaining a separate copy of the game state: a past state that is known 
 to be consistent and all events received since. That other copy only gets 'bumped forward' when

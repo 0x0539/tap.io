@@ -188,6 +188,6 @@ optimistic, real-time view of the current state. It may be inconsistent at the t
 to high-latency connections (which is why I used the term optimistic), but those inconsistencies 
 will be corrected by the engine as soon as possible. 
 
-Internally, this works by maintaining a separate copy of the game state; a past state that is known 
-to be consistent, as well as all events received since. That other copy only gets 'bumped forward' when
+Internally, this works by maintaining a separate copy of the game state: a past state that is known 
+to be consistent and all events received since. That other copy only gets 'bumped forward' when
 we can guarantee that we have received all events that occurred before it, on the virtual timeline.

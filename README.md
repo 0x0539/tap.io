@@ -124,7 +124,7 @@ intellect by doing so again.
 ### validate(state, event)
 
 This function should throw an exception if **event** is invalid, given the **state**. This can be used, for example, to prevent users
-from modifying eachothers positions by checking **event.senderSessionId** against **event.data.playerId**.
+from modifying each others positions by checking **event.senderSessionId** against **event.data.playerId**.
 
 Rendering Engine Extension
 ==========================

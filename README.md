@@ -18,7 +18,7 @@ A great deal of the codebase is shared between server and client (see /lib/share
 includes the core game engine and just about everything except rendering (client-only) 
 and networking (client and server function differently).
 
-This means reliable results and keeps the labor costs of writing tests down.
+This means more reliable results and 1/2 the tests.
 
 ### Efficient Use of Bandwidth
 

@@ -183,7 +183,7 @@ The interface basically amounts to two things:
 1. invoking the superclass (Renderer) constructor with the Game object
 2. implementing render
 
-The render function should actually render the ```this.game.projectedState``` data, which is an
+The render function should render ```this.game.projectedState```, which is an
 optimistic, real-time view of the current state. It is optimistic because the projected state
 may be inconsistent with other clients. Inconsistencies in projected states occur when events that
 have virtual timestamps less than the current virtual clock (which moves forward at ~30 ticks per second). 

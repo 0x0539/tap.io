@@ -22,9 +22,11 @@ This means reliable results and keeps the labor costs of writing tests down.
 
 ### Efficient Use of Bandwidth
 
-In theory, the only communication between server and client are tiny event messages from clients 
-(such as keyboard input events) and server-side events such as spawning monsters. That, of course, 
-does not count resources that have to be downloaded on client initialization.
+Once a client has been initialized, communication is kept to a minimum. Only essential information
+is exchanged -- tiny event messages from clients (such as keyboard input events) and server-side events 
+such as spawning monsters. Additionally, all communication is done over WebSockets (if supported 
+by the browser), which reduces the overhead of repeatedly establishing TCP connections when compared
+to protocols such as HTTP. 
 
 ### State as Pure Data
 

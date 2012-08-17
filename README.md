@@ -101,9 +101,12 @@ for(var i = 0; i < state.players.length; i++)
     state.players[i].y -= 10;
 ```
 
-Note, it is crucial that the results of this function are deterministic! That means there should not be randomness
-used to determine the progression of the state. If you want random events or anything like that, you should use
-events.
+Note, it is crucial that the results of this function are deterministic! I may have mentioned that once or twice already...
+For our purposes, deterministic means that, when given input state A, the function should **always** return B. Never C. 
+Whether it is running on node.js or Chrome or (should it ever get WebGL) IE, it should always return B. You get the picture.
+
+That means no Math.random(). To have randomness, you should use server-generated events backed by Math.random() until 
+I can provide a suitable replacement for the Math.random() function.
 
 ### handle(state, event)
 
@@ -115,7 +118,8 @@ if(event.data.type == 'spawnMonster')
   state.monsters.push({type: event.data.monsterType, x: event.data.monsterX, y: event.data.monsterY});
 ```
 
-This code should also be deterministic.
+This code should also be deterministic. As much fun as I have explaining what that means, I'll refrain from insulting your
+intellect by doing so again.
 
 ### validate(state, event)
 

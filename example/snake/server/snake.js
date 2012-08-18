@@ -1,9 +1,9 @@
 // server-only dependencies
-var network = require('./network.js');
-var game = require('./game.js');
+var network = require('../../../lib/server/network.js');
+var game = require('../../../lib/server/game.js');
 
 // shared dependencies
-var engine = require('../shared/engine.js');
+var engine = require('../../../lib/shared/engine.js');
 var snake = require('../shared/snake-engine.js');
 
 // plug in game engine

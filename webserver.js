@@ -10,12 +10,12 @@ var Parameters = {
     '/lib/shared/utilities.js',
     '/lib/shared/engine.js',
     '/lib/shared/parameters.js',
-    '/lib/shared/snake-engine.js',
+    '/example/snake/shared/snake-engine.js',
+    '/example/snake/client/snake-renderer.js',
     '/lib/vendor/three.min.js',
     '/lib/client/raf.js',
     '/lib/client/game.js',
     '/lib/client/render-loop.js',
-    '/lib/client/snake-renderer.js',
   ]
 };
 
@@ -73,8 +73,8 @@ var respondWithFile = function(path, response, contentType, map){
 };
 
 var handlers = {
-  home: function(request, response){
-    respondWithFile('./lib/client/home.html.ejs', response, 'text/html', function(data){
+  snake: function(request, response){
+    respondWithFile('./example/snake/client/home.html.ejs', response, 'text/html', function(data){
       return EJS.render(data, Parameters);
     });
   },
@@ -87,7 +87,7 @@ var handlers = {
 
 
 var routes = {
-  "home": "/",
+  "snake": "/snake.html",
   "jsfile": Parameters.scripts
 };
 

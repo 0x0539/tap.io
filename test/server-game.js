@@ -234,33 +234,31 @@ describe('server/Game', function(){
       assert.ok(game.state.clock > clock);
     });
 
-    it('should call Engine.safelyAdvance with game state', function(){
-      var game = new this.Game(buildNetworkMock()),
-          called = 0;
-
-      game.Engine = {
-        safelyAdvance: function(state){
-          assert.deepEqual(state, game.state);
-          called++;
-        }
-      };
-
-      game.loop();
-
-      assert.equal(called, 1);
-    });
   });
 
   describe('#start', function(){
-    it('should create a loop and a heartbeat interval', function(){
+    it('should create a heartbeat interval', function(){
       var game = new this.Game(buildNetworkMock());
       assert.equal(typeof game.heartbeatInterval, 'undefined');
-      assert.equal(typeof game.gameLoopInterval, 'undefined');
       game.start();
       assert.equal(typeof game.heartbeatInterval, 'object');
-      assert.equal(typeof game.gameLoopInterval, 'object');
       clearInterval(game.heartbeatInterval);
+    });
+
+    it('should create a loop interval', function(){
+      var game = new this.Game(buildNetworkMock());
+      assert.equal(typeof game.gameLoopInterval, 'undefined');
+      game.start();
+      assert.equal(typeof game.gameLoopInterval, 'object');
       clearInterval(game.gameLoopInterval);
+    });
+
+    it('should create a compact interval', function(){
+      var game = new this.Game(buildNetworkMock());
+      assert.equal(typeof game.gameCompactInterval, 'undefined');
+      game.start();
+      assert.equal(typeof game.gameCompactInterval, 'object');
+      clearInterval(game.gameCompactInterval);
     });
 
     it('should complain if Parameters.vtPeriodInMillis is undefined', function(){

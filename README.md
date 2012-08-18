@@ -40,26 +40,28 @@ find out which chest to open merely by running a ```console.log(game.state.where
 console. That problem may need to be solved by exposing other API's for the game, though I certainly hope
 another solution presents itself.
 
-### Clean API
-
-When developing on tap.io, you will implement two things:
-
-1. Game Engine Extension - physics, event handling implementation (client and server)
-2. Rendering Engine Extension - state rendering (client only)
-
-There are well-defined interfaces for both. For details, see the Game Engine Extension 
-and Rendering Engine Extension sections below.
-
 ### Large Test Suite
 
 I aim to provide a large amount of test coverage for this platform (though it seems like a given in these
 days of TDD).
 
-Game Engine Extension
-=====================
+Working with tap.io
+===================
 
+When developing on tap.io, you will implement a couple things:
+
+1. Game-specific physics and event handling (code shared between client and server)
+2. Game state rendering (client only)
+3. Server code that instantiates your socket.io server
+4. Client html to load the game
+
+There are well-defined interfaces for 1 and 2. Details on all tasks, as well as information on how to 
+run the example, are all provided below.
+
+### Task 1. Game Engine
 The game engine extension is javascript code that is shared between client and server. It contains the logic
-of your game (*deterministic* physics and event handling). Here is a skeleton example:
+of your game (*deterministic* physics and event handling). Here is a skeleton example (there is a full implementation
+of the snake game in example/snake you can look at):
 
 ```
 // define exports namespace for clients if it does not exist
@@ -88,9 +90,9 @@ exports.SnakeEngine = (function(){
 })();
 ```
 
-The game engine extension api is broken down into three functions.
+The game engine extension api is broken down into three functions: update, handle, and validate.
 
-### update(state)
+#### update(state)
 
 This function should perform an *in place* update of the state object, according to the rules of your game. That
 means, for example, it could contain code like the following:
@@ -101,14 +103,15 @@ for(var i = 0; i < state.players.length; i++)
     state.players[i].y -= 10;
 ```
 
-Note, it is crucial that the results of this function are deterministic! I may have mentioned that once or twice already...
-For our purposes, deterministic means that, when given input state A, the function should **always** return B. Never C. 
-Whether it is running on node.js or Chrome or (should it ever get WebGL) IE, it should always return B. You get the picture.
+Note, it is crucial that the results of this function are deterministic! I may have mentioned that once or 
+twice already...  For our purposes, deterministic means that, when given input state A, the function should 
+**always** return B. Never C.  Whether it is running on node.js or Chrome or (should it ever get WebGL) IE, 
+it should always return B.
 
 That means no Math.random(). To have randomness, you should use server-generated events backed by Math.random() until 
-I can provide a suitable replacement for the Math.random() function.
+I can provide a suitable replacement for the Math.random() function.  
 
-### handle(state, event)
+#### handle(state, event)
 
 This function should process the given event and alter the state according to the mechanics of your game. For example,
 if your game has a *spawnMonster* event, your code might look like this:
@@ -118,59 +121,28 @@ if(event.data.type == 'spawnMonster')
   state.monsters.push({type: event.data.monsterType, x: event.data.monsterX, y: event.data.monsterY});
 ```
 
-This code should also be deterministic. As much fun as I have explaining what that means, I'll refrain from insulting your
-intellect by doing so again.
+This code should also be deterministic. As much fun as I have explaining what that means, I'll refrain 
+from insulting your intellect by doing so again.
 
-### validate(state, event)
+#### validate(state, event)
 
-This function should throw an exception if **event** is invalid, given the **state**. This can be used, for example, to prevent users
-from modifying each others positions by checking **event.senderSessionId** against **event.data.playerId**.
+This function should throw an exception if **event** is invalid, given the **state**. This can be used, 
+for example, to prevent users from modifying each others positions by checking to see if
+**event.senderSessionId** (secure field set by the server) matches *event.data.playerId**.
 
-Rendering Engine Extension
-==========================
+### Renderer
 
-The rendering engine is how your game actually shows up in the browser. You will need to 'subclass' the Renderer 
-class on the client. Here is an example that renders some internals of the game to a page with every render loop:
+The second component you have to implement is the rendering engine, how your game actually shows up 
+in the browser. Essentially, you will need to have some kind of object with a render function.
+Here is an example skeleton from the snake project (see example/snake for a complete implementation):
 
 ```
 window.SnakeRenderer = (function(){
 
-  var SnakeRenderer = function(game){
-    window.Renderer.call(this, game); // call super constructor
-  };
+  var SnakeRenderer = function(){ };
 
-  // set up inheritance from Renderer
-  var Surrogate = function(){};
-  Surrogate.prototype = window.Renderer.prototype;
-  SnakeRenderer.prototype = new Surrogate();
-  SnakeRenderer.prototype.constructor = SnakeRenderer;
-
-  // magic!
-  SnakeRenderer.prototype.render = function(){
-    if(this.game.projectedState == null)
-      return; // nothing to do
-
-    if(this.game.sessionId == null)
-      throw new Error('no session id set. who am i?');
-
-    var state = this.game.projectedState,
-        sessionId = this.game.sessionId;
-
-    $('body').html([
-      '<h2>Safe State</h2>',
-      '<b>clock<b> is ' + this.game.state.clock,
-      '<b>vt</b> is ' + this.game.state.vt,
-      '<b>event count</b> is ' + this.game.state.events.length,
-      '<b>player count</b> is ' + this.game.state.sessionIds.length,
-      '<h2>Projected State</h2>',
-      '<b>clock</b> is ' + state.clock,
-      '<b>vt</b> is ' + state.vt,
-      '<b>event count</b> is ' + state.events.length,
-      '<b>player count</b> is ' + state.sessionIds.length
-    ].join('<br/>'))
-
-
-    // handle teh rendar!
+  SnakeRenderer.prototype.render = function(sessionId, state){
+    // rendar!
   };
 
   return SnakeRenderer;
@@ -178,18 +150,98 @@ window.SnakeRenderer = (function(){
 })();
 ```
 
-The interface basically amounts to two things:
+The render() function takes the sessionId of the user you are rendering for, and the entire game state.
 
-1. invoking the superclass (Renderer) constructor with the Game object
-2. implementing render
+#### Quick Aside
 
-The render function should render ```this.game.projectedState```, which is an
+The render function is actually rendering ```game.projectedState```, which is an
 *optimistic*, *real-time* view of the game state. It is *optimistic* because the projected state
 may be inconsistent with other clients. Inconsistencies in projected states occur when events are received that
 have virtual timestamps less than virtual clock time (which moves forward at ~30 ticks per second). 
-It is *real-time* because the projected state is our best guess at what the true state is at virtual clock time. Remember,
-we might not yet have received all events with virtual timestamps less than virtual clock time.
+It is *real-time* because the projected state is our best guess at what the true state is at virtual clock time. 
+Remember, we might not yet have received all events with virtual timestamps less than virtual clock time.
 
 Internally, this works by maintaining a separate copy of the game state: a past state that is known 
 to be consistent and all events received since. That other copy only gets 'bumped forward' when
 we can guarantee that we have received all events that occurred before it, on the virtual timeline.
+
+### Server Wrapper
+
+Here is what a server wrapper might look like (taken from example/snake/server/snake.js):
+
+```
+// server-only dependencies
+var network = require('../../../lib/server/network.js');
+var game = require('../../../lib/server/game.js');
+
+// shared dependencies
+var engine = require('../../../lib/shared/engine.js');
+var snake = require('../shared/snake-engine.js');
+
+// plug in game engine
+engine.Engine.plugins.push(snake.SnakeEngine);
+
+// start the networking
+var server = new network.Network(9585);
+server.start();
+
+// start the game manager
+var game = new game.Game(server);
+game.start();
+```
+
+This is the entry point to your socket.io server. It requires all the server modules and shared engine
+code, and starts the server.
+
+### Client Wrapper
+
+Here is what your client wrapper might look like (taken from example/snake/client/home.html.ejs):
+
+```
+<html>
+  <head>
+    <style>
+      div {
+        width: 1024;
+        height: 768;
+        margin: auto;
+        border: 2px solid;
+        border-radius: 25px;
+      }
+    </style>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js" ></script>
+    <script type="text/javascript" src="<%= socketio %>/socket.io/socket.io.js" ></script>
+    <% for(var i = 0; i < scripts.length; i++){ %>
+      <script type="text/javascript" src="<%= baseurl %><%= scripts[i] %>" ></script>
+    <% } %>
+    <script type="text/javascript" defer="defer">
+      $(function(){
+        exports.Engine.plugins.push(exports.SnakeEngine);
+
+        var socket = window.io.connect('<%= socketio %>'),
+            game = new window.Game(socket),
+            renderer = new window.SnakeRenderer(),
+            renderLoop = new window.RenderLoop(game, renderer);
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
+```
+
+Basically, it sets up all the script tags your client will need, and constructs step-by-step the 
+different components necessary for the game to run:
+
+- a socket.io socket
+- a window.Game (see lib/client/game.js)
+- a window.SnakeRenderer (your renderer implementation)
+- a window.RenderLoop (invokes your animation stuffs)
+
+Running the Example
+===================
+After cloning the repository, you should run ```node webserver.js``` and ```node example/snake/server/snake.js```.
+The ```webserver.js``` is the HTTP interface to the game files, and ```snake.js``` is the server wrapper.
+
+Now you should be able to hit http://localhost:7787/snake.html in a couple different windows and see what happens.
+I plan on hosting a live demo of this soon.
+

@@ -11,7 +11,8 @@
 
         var socket = window.io.connect('<%= socketio %>'),
             game = new window.Game(socket),
-            renderer = window.Renderer(game, window.SnakeRenderer);
+            renderer = new window.SnakeRenderer(),
+            renderLoop = new window.RenderLoop(game, renderer);
       })();
     </script>
   </head>

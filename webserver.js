@@ -13,7 +13,7 @@ var Parameters = {
     '/lib/shared/snake-engine.js',
     '/lib/client/raf.js',
     '/lib/client/game.js',
-    '/lib/client/renderer.js',
+    '/lib/client/render-loop.js',
     '/lib/client/snake-renderer.js',
   ]
 };

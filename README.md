@@ -130,7 +130,7 @@ This function should throw an exception if **event** is invalid, given the **sta
 for example, to prevent users from modifying each others positions by checking to see if
 **event.senderSessionId** (secure field set by the server) matches *event.data.playerId**.
 
-### Renderer
+### Task 2. Renderer
 
 The second component you have to implement is the rendering engine, how your game actually shows up 
 in the browser. Essentially, you will need to have some kind of object with a render function.
@@ -152,7 +152,7 @@ window.SnakeRenderer = (function(){
 
 The render() function takes the sessionId of the user you are rendering for, and the entire game state.
 
-#### Quick Aside
+#### Quick Rant
 
 The render function is actually rendering ```game.projectedState```, which is an
 *optimistic*, *real-time* view of the game state. It is *optimistic* because the projected state
@@ -165,7 +165,7 @@ Internally, this works by maintaining a separate copy of the game state: a past 
 to be consistent and all events received since. That other copy only gets 'bumped forward' when
 we can guarantee that we have received all events that occurred before it, on the virtual timeline.
 
-### Server Wrapper
+### Task 3. Server Wrapper
 
 Here is what a server wrapper might look like (taken from example/snake/server/snake.js):
 
@@ -193,7 +193,7 @@ game.start();
 This is the entry point to your socket.io server. It requires all the server modules and shared engine
 code, and starts the server.
 
-### Client Wrapper
+### Task 4. Client Wrapper
 
 Here is what your client wrapper might look like (taken from example/snake/client/home.html.ejs):
 

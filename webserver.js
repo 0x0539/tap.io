@@ -11,6 +11,7 @@ var Parameters = {
     '/lib/shared/engine.js',
     '/lib/shared/parameters.js',
     '/lib/shared/snake-engine.js',
+    '/lib/vendor/three.min.js',
     '/lib/client/raf.js',
     '/lib/client/game.js',
     '/lib/client/render-loop.js',
@@ -73,7 +74,7 @@ var respondWithFile = function(path, response, contentType, map){
 
 var handlers = {
   home: function(request, response){
-    respondWithFile('./home.html.ejs', response, 'text/html', function(data){
+    respondWithFile('./lib/client/home.html.ejs', response, 'text/html', function(data){
       return EJS.render(data, Parameters);
     });
   },

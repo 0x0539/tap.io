@@ -1,8 +1,8 @@
 window.SnakeRenderer = (function(){
 
   var FaceBucket = function(cols, rows){
-    this.cols = cols || 40;
-    this.rows = rows || 40;
+    this.cols = cols || 50;
+    this.rows = rows || 50;
     this.faceData = [];
     this.l = null;
     this.t = null;
@@ -78,6 +78,14 @@ window.SnakeRenderer = (function(){
       }
     }
 
+    var count = 0;
+
+    for(var i = 0; i < this.buckets.length; i++)
+      for(var j = 0; j < this.buckets[i].length; j++)
+        count += this.buckets[i][j].length;
+
+    console.log('average bucket count: ' + (count / (this.rows * this.cols)));
+
   };
 
   FaceBucket.prototype.inBounds = function(x, y){
@@ -100,10 +108,9 @@ window.SnakeRenderer = (function(){
 
     this.width = 1024;
     this.height = 768;
-    this.cameraDistance = 500;
+    this.cameraDistance = 400;
     this.sphereRadius = 10;
 
-    //this.camera = new THREE.OrthographicCamera(-this.width/2, this.width/2, this.height/2, -this.height/2, 1, 500);
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 2000);
     this.camera.position.set(0, 0, this.cameraDistance);
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -121,9 +128,8 @@ window.SnakeRenderer = (function(){
 
   SnakeRenderer.prototype.constructTerrain = function(state){
     if(this.terrain != null)
-      return; //terrain is static fool
+      return;
 
-    // contains merged geometry
     geometry = new THREE.Geometry();
     geometry.materials = [new THREE.MeshLambertMaterial({color: 0xCC0000})];
 
@@ -220,15 +226,15 @@ window.SnakeRenderer = (function(){
   SnakeRenderer.prototype.getCollisionPoints = function(){
     if(this.sphereCollisionPoints == null){
       this.sphereCollisionPoints = [];
-      var angles = 4,
-          radii = 3;
-      for(var i = 0; i <= radii; i++){
-        var radius = i * this.sphereRadius / radii;
-        for(var angle = 0; angle <= angles; angle++){
-          var radians = angle * 2 * Math.PI / angles,
+      var angles = 8,
+          radii = 6;
+      for(var i = 0; i < radii; i++){
+        var radius = i * this.sphereRadius / (radii - 1);
+        for(var angle = 0; angle < angles; angle++){
+          var radians = angle * 2 * Math.PI / (angles - 1),
               x = radius * Math.sin(radians),
               y = radius * Math.cos(radians),
-              g = Math.sqrt(x*x + y*y),
+              g = Math.max(0, Math.sqrt(x*x + y*y)),
               d = Math.sqrt(this.sphereRadius*this.sphereRadius - g*g);
           this.sphereCollisionPoints.push({x: x, y: y, d: d});
         }
@@ -262,9 +268,6 @@ window.SnakeRenderer = (function(){
             var face = faces[f],
                 plane = face.plane,
                 newZ = (plane.A*x + plane.B*y + plane.D)/-plane.C + d;
-
-            if(isNaN(newZ))
-              console.log(plane.A + ', ' + plane.B + ', ' + plane.D + ', ' + plane.C + ', ' + x + ', ' + y + ', ' + d);
 
             z = newZ > z ? newZ : z;
           }

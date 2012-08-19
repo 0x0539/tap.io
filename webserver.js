@@ -74,7 +74,7 @@ var respondWithFile = function(path, response, contentType, map){
 
 var handlers = {
   snake: function(request, response){
-    respondWithFile('./example/snake/client/home.html.ejs', response, 'text/html', function(data){
+    respondWithFile('./example/snake/client/snake.html.ejs', response, 'text/html', function(data){
       return EJS.render(data, Parameters);
     });
   },

@@ -16,7 +16,7 @@ server.start();
 // start the game manager
 var game = new game.Game(server);
 
-var terrainVariation = 8;
+var terrainVariation = 20;
 
 // generate the terrain
 game.state.terrain = [];

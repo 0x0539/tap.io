@@ -87,8 +87,8 @@ var handlers = {
 
 
 var routes = {
-  "snake": "/snake.html",
-  "jsfile": Parameters.scripts
+  snake: "/",
+  jsfile: Parameters.scripts
 };
 
 var server = HTTP.createServer(function(request, response){

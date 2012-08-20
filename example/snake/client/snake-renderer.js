@@ -205,32 +205,34 @@ window.SnakeRenderer = (function(){
     return this.segmentPool[this.segmentPoolIndex++];
   };
 
-  SnakeRenderer.prototype.sameSide = function(v1, v2, v3, p){
-    var a = new THREE.Vector2(v2.x - v1.x, v2.y - v1.y),
-        b = new THREE.Vector2(v3.x - v1.x, v3.y - v1.y),
-        c = new THREE.Vector2(p.x - v1.x, p.y - v1.y),
-        z1 = a.x*b.y - a.y*b.x,
-        z2 = a.x*c.y - a.y*c.x;
+  // are b and c on the same side of (a - v)? (projected onto plane z=0, we ignore z values)
+  SnakeRenderer.prototype.sameSide = function(v, a, b, c){
+    var ax = a.x - v.x,
+        ay = a.y - v.y,
+        bx = b.x - v.x,
+        by = b.y - v.y,
+        cx = c.x - v.x,
+        cy = c.y - v.y,
+        z1 = ax*by - ay*bx,
+        z2 = ax*cy - ay*cx;
     return z1 * z2 > 0;
   };
 
+  // is p inside the triangle defined by v1,v2,v3? (projected onto plane z=0, we ignore z values)
   SnakeRenderer.prototype.triangleContains = function(v1, v2, v3, p){
     return this.sameSide(v1, v2, v3, p) && this.sameSide(v2, v3, v1, p) && this.sameSide(v3, v1, v2, p);
   };
 
   SnakeRenderer.prototype.getFacesContainingPoint = function(x, y, geometry){
     var faces = [],
-        sample = this.faceBucket.get(x, y);
+        sample = this.faceBucket.get(x, y),
+        p = new THREE.Vector2(x, y);
     for(var f = 0; f < sample.length; f++){
       var face = sample[f],
           v1 = geometry.vertices[face.a],
           v2 = geometry.vertices[face.b],
-          v3 = geometry.vertices[face.c],
-          minx = Math.min.apply(Math.min, [v1.x, v2.x, v3.x]),
-          miny = Math.min.apply(Math.min, [v1.y, v2.y, v3.y]),
-          maxx = Math.max.apply(Math.max, [v1.x, v2.x, v3.x]),
-          maxy = Math.max.apply(Math.max, [v1.y, v2.y, v3.y]);
-      if(x > minx && y > miny && x < maxx && y < maxy)
+          v3 = geometry.vertices[face.c];
+      if(this.triangleContains(v1, v2, v3, p))
         faces.push(face);
     }
     return faces;

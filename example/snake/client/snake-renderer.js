@@ -205,6 +205,19 @@ window.SnakeRenderer = (function(){
     return this.segmentPool[this.segmentPoolIndex++];
   };
 
+  SnakeRenderer.prototype.sameSide = function(v1, v2, v3, p){
+    var a = new THREE.Vector2(v2.x - v1.x, v2.y - v1.y),
+        b = new THREE.Vector2(v3.x - v1.x, v3.y - v1.y),
+        c = new THREE.Vector2(p.x - v1.x, p.y - v1.y),
+        z1 = a.x*b.y - a.y*b.x,
+        z2 = a.x*c.y - a.y*c.x;
+    return z1 * z2 > 0;
+  };
+
+  SnakeRenderer.prototype.triangleContains = function(v1, v2, v3, p){
+    return this.sameSide(v1, v2, v3, p) && this.sameSide(v2, v3, v1, p) && this.sameSide(v3, v1, v2, p);
+  };
+
   SnakeRenderer.prototype.getFacesContainingPoint = function(x, y, geometry){
     var faces = [],
         sample = this.faceBucket.get(x, y);

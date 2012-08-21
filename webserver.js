@@ -10,6 +10,8 @@ var Parameters = {
     '/lib/shared/utilities.js',
     '/lib/shared/engine.js',
     '/lib/shared/parameters.js',
+    '/lib/shared/facebucket.js',
+    '/lib/shared/freed.js',
     '/example/snake/shared/snake-engine.js',
     '/example/snake/client/snake-renderer.js',
     '/lib/vendor/three.min.js',

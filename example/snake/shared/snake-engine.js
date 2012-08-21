@@ -9,25 +9,61 @@ if(typeof exports == 'undefined') window.exports = {};
 
 exports.SnakeEngine = (function(){
 
-  var buildNewPlayer = function(){
-    var player = {};
-    player.direction = 'south';
-    player.segments = [];
+  var FREED = typeof window == 'undefined' ? require('../../../lib/shared/freed.js').FREED : exports.FREED,
+      FaceBucket = typeof window == 'undefined' ? require('../../../lib/shared/facebucket.js').FaceBucket : exports.FaceBucket;
+
+
+  var SnakeEngine = {
+    speed: 2,
+    radius: 10
+  };
+
+  var sameSide = function(a, b, p, x, y){
+    var abx = b.x - a.x,
+        aby = b.y - a.y,
+        apx = p.x - a.x,
+        apy = p.y - a.y,
+        aqx = x - a.x,
+        aqy = y - a.y,
+        cp1 = abx*apy - aby*apx,
+        cp2 = abx*aqy - aby*aqx;
+    return cp1 * cp2 > 0;
+  };
+
+  var triangleContains = function(face, geometry, x, y){
+    var v = FREED.Face3.vertices(face, geometry);
+    return sameSide(v[0], v[1], v[2], x, y) &&
+           sameSide(v[1], v[2], v[0], x, y) &&
+           sameSide(v[2], v[0], v[1], x, y);
+  };
+
+  SnakeEngine.buildNewPlayer = function(){
+    var player = {
+      direction: 'east',
+      segments: []
+    };
+
     for(var y = 0; y < 3; y++){
-      var sphere = FREED.Sphere(FREED.Vector3(0, y*30, 0), 10);
+      var center = FREED.Vector3(30*y, 30, 0),
+          sphere = FREED.Sphere(center, this.radius);
+
       player.segments.push({
         sphere: sphere, 
         path: []
       });
     }
+
     return player;
   };
 
-  var speed = 2;
-
-  var SnakeEngine = {};
-
   SnakeEngine.update = function(state){
+
+    // calculate face bucket for the terrain, which is static so we only do it once
+    if(this.faceBucket == null)
+      this.faceBucket = new FaceBucket(20, 20, state.terrain);
+    if(this.xyPlane == null)
+      this.xyPlane = FREED.Plane(FREED.Vector3(0, 0, 1), FREED.Vector3(0, 0, 0));
+
     for(var sessionId in state.players){
       var player = state.players[sessionId];
       for(var i = 0; i < player.segments.length; i++){
@@ -36,7 +72,7 @@ exports.SnakeEngine = (function(){
             path = segment.path;
 
         // remove from path if already there
-        while(path.length && FREED.Vector3.equal(center, path[0]))
+        while(path.length && FREED.Vector3.equals(center, path[0]))
           path.shift();
 
         // if we still have a destination, move to it
@@ -44,9 +80,9 @@ exports.SnakeEngine = (function(){
           var next = path[0],
               delta = FREED.Vector3.sub(next, center);
 
-          delta.x = Math.min(-speed, Math.max(speed, delta.x));
-          delta.y = Math.min(-speed, Math.max(speed, delta.y));
-          delta.z = Math.min(-speed, Math.max(speed, delta.z));
+          delta.x = Math.max(-this.speed, Math.min(this.speed, delta.x));
+          delta.y = Math.max(-this.speed, Math.min(this.speed, delta.y));
+          delta.z = Math.max(-this.speed, Math.min(this.speed, delta.z));
 
           FREED.Vector3.addSelf(center, delta);
         }
@@ -55,19 +91,43 @@ exports.SnakeEngine = (function(){
         else{
           switch(player.direction){
             case 'north':
-              center.y += speed;
+              center.y += this.speed;
               break;
             case 'south':
-              center.y -= speed;
+              center.y -= this.speed;
               break;
             case 'east':
-              center.x += speed;
+              center.x += this.speed;
               break;
             case 'west':
-              center.x -= speed;
+              center.x -= this.speed;
               break;
           }
         }
+
+        // collision detection
+        var maxZ = null, 
+            cps = FREED.Sphere.getCollisionPoints(segment.sphere.radius);
+
+        for(var c = 0; c < cps.length; c++){
+          var cp = cps[c],
+              x = cp.x + center.x,
+              y = cp.y + center.y,
+              d = cp.d,
+              faces = this.faceBucket.get(x, y);
+          for(var f = 0; f < faces.length; f++){
+            if(triangleContains(faces[f], state.terrain, x, y)){
+              var plane = FREED.Face3.plane(faces[f], state.terrain),
+                  sphereZ = FREED.Plane.solveZ(plane, x, y) + d;
+              maxZ = maxZ == null || sphereZ > maxZ ? sphereZ : maxZ;
+            }
+          }
+        }
+
+        if(maxZ == null)
+          center.z = 0;
+        else
+          center.z = maxZ;
       }
     }
   };
@@ -80,7 +140,7 @@ exports.SnakeEngine = (function(){
     switch(event.type){
       case 'startSession':
         state.players = state.players || {};
-        state.players[event.data.sessionId] = buildNewPlayer();
+        state.players[event.data.sessionId] = this.buildNewPlayer();
         break;
       case 'endSession':
         delete state.players[event.data.sessionId];
@@ -111,7 +171,7 @@ exports.SnakeEngine = (function(){
 
         // save head location in segment paths
         for(var i = 1; i < player.segments.length; i++)
-          player.segments[i].path.push(Vector3.copy(head.sphere.center));
+          player.segments[i].path.push(FREED.Vector3.copy(head.sphere.center));
 
         break;
     }

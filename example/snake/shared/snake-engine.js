@@ -4,14 +4,9 @@
  * it keeps us from using jQuery and node.js extensions.
  */
 
-// define exports namespace for clients if it does not exist
-if(typeof exports == 'undefined') window.exports = {};
+(window || exports).SnakeEngine = (function(){
 
-exports.SnakeEngine = (function(){
-
-  var FREED = typeof window == 'undefined' ? require('../../../lib/shared/freed.js').FREED : exports.FREED,
-      FaceBucket = typeof window == 'undefined' ? require('../../../lib/shared/facebucket.js').FaceBucket : exports.FaceBucket;
-
+  var FREED = (window || require('../../../lib/shared/freed/freed.js')).FREED;
 
   var SnakeEngine = {
     speed: 2,
@@ -60,7 +55,7 @@ exports.SnakeEngine = (function(){
 
     // calculate face bucket for the terrain, which is static so we only do it once
     if(this.faceBucket == null)
-      this.faceBucket = new FaceBucket(20, 20, state.terrain);
+      this.faceBucket = new FREED.FaceBucket(20, 20, state.terrain);
     if(this.xyPlane == null)
       this.xyPlane = FREED.Plane(FREED.Vector3(0, 0, 1), FREED.Vector3(0, 0, 0));
 

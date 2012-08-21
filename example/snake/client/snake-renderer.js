@@ -57,7 +57,7 @@ window.SnakeRenderer = (function(){
   SnakeRenderer.prototype.getSegment = function(){
     if(this.segmentPoolIndex >= this.segmentPool.length){
       var newSegment = new THREE.Mesh(
-        new THREE.SphereGeometry(exports.SnakeEngine.radius),
+        new THREE.SphereGeometry(window.SnakeEngine.radius),
         new THREE.MeshLambertMaterial({color: 0x00ff00})
       );
       this.segmentPool.push(newSegment);

@@ -1,10 +1,12 @@
+global.window = false;
+
 // server-only dependencies
 var network = require('../../../lib/server/network.js');
 var game = require('../../../lib/server/game.js');
 
 // shared dependencies
 var engine = require('../../../lib/shared/engine.js'),
-    FREED = require('../../../lib/shared/freed.js').FREED;
+    FREED = require('../../../lib/shared/freed/freed.js').FREED;
 
 var snake = require('../shared/snake-engine.js');
 

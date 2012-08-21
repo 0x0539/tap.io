@@ -20,11 +20,11 @@ var game = new game.Game(server);
 
 game.state.terrain = FREED.Geometry();
 
-var cols = 30, rows = 30;
+var cols = 30, rows = 30, scale = 30;
 for(var i = 0; i < cols; i++){
   for(var j = 0; j < rows; j++){
-    var z = 10*Math.sin(Math.sqrt(i*i + j*j));
-    game.state.terrain.vertices.push(FREED.Vector3(i*10, j*10, z));
+    var z = scale*Math.sin(Math.sqrt(i*i + j*j));
+    game.state.terrain.vertices.push(FREED.Vector3(i*scale, j*scale, z));
   }
 }
 

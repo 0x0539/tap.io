@@ -25,8 +25,9 @@ game.state.terrain = FREED.Geometry();
 var cols = 30, rows = 30, scale = 30;
 for(var i = 0; i < cols; i++){
   for(var j = 0; j < rows; j++){
-    var z = scale*Math.sin(Math.sqrt(i*i + j*j));
-    game.state.terrain.vertices.push(FREED.Vector3(i*scale, j*scale, z));
+    var z1 = scale*Math.sin(Math.sqrt(i*i + j*j)),
+        z2 = 2*scale*Math.sin(Math.sqrt((rows-i)*(rows-i) + j*j));
+    game.state.terrain.vertices.push(FREED.Vector3(i*scale, j*scale, z1 + z2));
   }
 }
 

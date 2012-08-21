@@ -38,7 +38,7 @@
       segments: []
     };
 
-    for(var y = 0; y < 3; y++){
+    for(var y = 3; y > 0; y--){
       var center = FREED.Vector3(30*y, 30, 0),
           sphere = FREED.Sphere(center, this.radius);
 

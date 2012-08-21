@@ -1,24 +1,21 @@
 global.window = false;
 
 // server-only dependencies
-var network = require('../../../lib/server/network.js');
-var game = require('../../../lib/server/game.js');
-
-// shared dependencies
-var engine = require('../../../lib/shared/engine.js'),
-    FREED = require('../../../lib/shared/freed/freed.js').FREED;
-
-var snake = require('../shared/snake-engine.js');
+var Network = require('../../../lib/server/network.js').Network,
+    Game = require('../../../lib/server/game.js').Game,
+    Engine = require('../../../lib/shared/engine.js').Engine,
+    FREED = require('../../../lib/shared/freed/freed.js').FREED,
+    SnakeEngine = require('../shared/snake-engine.js').SnakeEngine;
 
 // plug in game engine
-engine.Engine.plugins.push(snake.SnakeEngine);
+Engine.plugins.push(SnakeEngine);
 
 // start the networking
-var server = new network.Network(9585);
+var server = new Network(9585);
 server.start();
 
 // start the game manager
-var game = new game.Game(server);
+var game = new Game(server);
 
 game.state.terrain = FREED.Geometry();
 

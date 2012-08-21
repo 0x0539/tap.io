@@ -13,8 +13,13 @@ exports.SnakeEngine = (function(){
     var player = {};
     player.direction = 'south';
     player.segments = [];
-    for(var y = 0; y < 3; y++)
-      player.segments.push({x: 0, y: y*30, path: []});
+    for(var y = 0; y < 3; y++){
+      var sphere = FREED.Sphere(FREED.Vector3(0, y*30, 0), 10);
+      player.segments.push({
+        sphere: sphere, 
+        path: []
+      });
+    }
     return player;
   };
 
@@ -26,40 +31,40 @@ exports.SnakeEngine = (function(){
     for(var sessionId in state.players){
       var player = state.players[sessionId];
       for(var i = 0; i < player.segments.length; i++){
-        var segment = player.segments[i];
+        var segment = player.segments[i],
+            center = segment.sphere.center,
+            path = segment.path;
 
         // remove from path if already there
-        while(segment.path.length && segment.x == segment.path[0].x && segment.y == segment.path[0].y)
-          segment.path.shift();
+        while(path.length && FREED.Vector3.equal(center, path[0]))
+          path.shift();
 
         // if we still have a destination, move to it
-        if(segment.path.length){
-          var dx = segment.path[0].x - segment.x,
-              dy = segment.path[0].y - segment.y;
+        if(path.length){
+          var next = path[0],
+              delta = FREED.Vector3.sub(next, center);
 
-          if(dx > 0) dx = Math.min(speed, dx);
-          if(dx < 0) dx = Math.max(-speed, dx);
-          if(dy > 0) dy = Math.min(speed, dy);
-          if(dy < 0) dy = Math.max(-speed, dy);
+          delta.x = Math.min(-speed, Math.max(speed, delta.x));
+          delta.y = Math.min(-speed, Math.max(speed, delta.y));
+          delta.z = Math.min(-speed, Math.max(speed, delta.z));
 
-          segment.x += dx;
-          segment.y += dy;
+          FREED.Vector3.addSelf(center, delta);
         }
 
         // otherwise, just go in the player direction
         else{
           switch(player.direction){
             case 'north':
-              segment.y += speed;
+              center.y += speed;
               break;
             case 'south':
-              segment.y -= speed;
+              center.y -= speed;
               break;
             case 'east':
-              segment.x += speed;
+              center.x += speed;
               break;
             case 'west':
-              segment.x -= speed;
+              center.x -= speed;
               break;
           }
         }
@@ -106,7 +111,7 @@ exports.SnakeEngine = (function(){
 
         // save head location in segment paths
         for(var i = 1; i < player.segments.length; i++)
-          player.segments[i].path.push({x: head.x, y: head.y});
+          player.segments[i].path.push(Vector3.copy(head.sphere.center));
 
         break;
     }

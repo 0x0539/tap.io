@@ -25,8 +25,7 @@
     return cp1 * cp2 > 0;
   };
 
-  var triangleContains = function(face, geometry, x, y){
-    var v = FREED.Face3.vertices(face, geometry);
+  var triangleContains = function(v, x, y){
     return sameSide(v[0], v[1], v[2], x, y) &&
            sameSide(v[1], v[2], v[0], x, y) &&
            sameSide(v[2], v[0], v[1], x, y);
@@ -77,7 +76,6 @@
 
           delta.x = Math.max(-this.speed, Math.min(this.speed, delta.x));
           delta.y = Math.max(-this.speed, Math.min(this.speed, delta.y));
-          delta.z = Math.max(-this.speed, Math.min(this.speed, delta.z));
 
           FREED.Vector3.addSelf(center, delta);
         }
@@ -111,8 +109,9 @@
               d = cp.d,
               faces = this.faceBucket.get(x, y);
           for(var f = 0; f < faces.length; f++){
-            if(triangleContains(faces[f], state.terrain, x, y)){
-              var plane = FREED.Face3.plane(faces[f], state.terrain),
+            var face = faces[f];
+            if(triangleContains(FREED.Face3.vertices(face, state.terrain), x, y)){
+              var plane = FREED.Face3.plane(face, state.terrain),
                   sphereZ = FREED.Plane.solveZ(plane, x, y) + d;
               maxZ = maxZ == null || sphereZ > maxZ ? sphereZ : maxZ;
             }

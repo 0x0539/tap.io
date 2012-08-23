@@ -6,11 +6,16 @@
 
 (window || exports).SnakeEngine = (function(){
 
-  var FREED = (window || require('../../../lib/shared/freed/freed.js')).FREED;
+  var FREED = (window || require('../../../lib/shared/freed/freed.js')).FREED,
+      Utilities = (window || require('../../../lib/shared/utilities.js')).Utilities;
+      Random = (window || require('../../../lib/shared/random.js')).Random;
+
+  var randall = new Random();
 
   var SnakeEngine = {
     speed: 2,
-    radius: 10
+    radius: 10,
+    foodRadius: 8
   };
 
   var sameSide = function(a, b, p, x, y){
@@ -29,6 +34,35 @@
     return sameSide(v[0], v[1], v[2], x, y) &&
            sameSide(v[1], v[2], v[0], x, y) &&
            sameSide(v[2], v[0], v[1], x, y);
+  };
+
+  SnakeEngine.floatSphere = function(terrain, sphere){
+
+    // collision detection
+    var maxZ = null, 
+        cps = FREED.Sphere.getCollisionPoints(sphere.radius),
+        center = sphere.center;
+
+    for(var c = 0; c < cps.length; c++){
+      var cp = cps[c],
+          x = cp.x + center.x,
+          y = cp.y + center.y,
+          d = cp.d,
+          faces = this.faceBucket.get(x, y);
+      for(var f = 0; f < faces.length; f++){
+        var face = faces[f];
+        if(triangleContains(FREED.Face3.vertices(face, terrain), x, y)){
+          var plane = FREED.Face3.plane(face, terrain),
+              sphereZ = FREED.Plane.solveZ(plane, x, y) + d;
+          maxZ = maxZ == null || sphereZ > maxZ ? sphereZ : maxZ;
+        }
+      }
+    }
+
+    if(maxZ == null)
+      center.z = 0;
+    else
+      center.z = maxZ;
   };
 
   SnakeEngine.buildNewPlayer = function(){
@@ -52,11 +86,25 @@
 
   SnakeEngine.update = function(state){
 
+    randall.wrap(state.arc4);
+
     // calculate face bucket for the terrain, which is static so we only do it once
     if(this.faceBucket == null)
       this.faceBucket = new FREED.FaceBucket(20, 20, state.terrain);
     if(this.xyPlane == null)
       this.xyPlane = FREED.Plane(FREED.Vector3(0, 0, 1), FREED.Vector3(0, 0, 0));
+
+    // spawn an apple
+    if(state.vt % Utilities.ms2ticks(1000) == 0){
+      var x = Math.floor(randall.random() * (this.faceBucket.r - this.faceBucket.l)),
+          y = Math.floor(randall.random() * (this.faceBucket.t - this.faceBucket.b)),
+          z = 40,
+          center = FREED.Vector3(x, y, z),
+          sphere = FREED.Sphere(center, this.foodRadius);
+      this.floatSphere(state.terrain, sphere);
+      state.food = state.food || [];
+      state.food.push(sphere);
+    }
 
     for(var sessionId in state.players){
       var player = state.players[sessionId];
@@ -98,30 +146,7 @@
           }
         }
 
-        // collision detection
-        var maxZ = null, 
-            cps = FREED.Sphere.getCollisionPoints(segment.sphere.radius);
-
-        for(var c = 0; c < cps.length; c++){
-          var cp = cps[c],
-              x = cp.x + center.x,
-              y = cp.y + center.y,
-              d = cp.d,
-              faces = this.faceBucket.get(x, y);
-          for(var f = 0; f < faces.length; f++){
-            var face = faces[f];
-            if(triangleContains(FREED.Face3.vertices(face, state.terrain), x, y)){
-              var plane = FREED.Face3.plane(face, state.terrain),
-                  sphereZ = FREED.Plane.solveZ(plane, x, y) + d;
-              maxZ = maxZ == null || sphereZ > maxZ ? sphereZ : maxZ;
-            }
-          }
-        }
-
-        if(maxZ == null)
-          center.z = 0;
-        else
-          center.z = maxZ;
+        this.floatSphere(state.terrain, segment.sphere);
       }
     }
   };

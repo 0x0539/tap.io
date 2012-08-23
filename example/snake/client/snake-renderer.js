@@ -22,6 +22,9 @@ window.SnakeRenderer = (function(){
     this.segmentPool = [];
     this.segmentPoolIndex = 0;
 
+    this.foodPool = [];
+    this.foodPoolIndex = 0;
+
     this.container = document.createElement('div');
     this.container.appendChild(this.renderer.domElement);
     document.body.appendChild(this.container);
@@ -66,12 +69,23 @@ window.SnakeRenderer = (function(){
     return this.segmentPool[this.segmentPoolIndex++];
   };
 
+  SnakeRenderer.prototype.getFood = function(){
+    if(this.foodPoolIndex >= this.foodPool.length){
+      var newFood = new THREE.Mesh(
+        new THREE.SphereGeometry(window.SnakeEngine.foodRadius),
+        new THREE.MeshLambertMaterial({color: 0x0000ff})
+      );
+      this.foodPool.push(newFood);
+      this.scene.add(newFood);
+    }
+    return this.foodPool[this.foodPoolIndex++];
+  };
+
   SnakeRenderer.prototype.render = function(playerSessionId, state){
 
     this.constructTerrain(state);
 
     this.segmentPoolIndex = 0;
-
     for(var sessionId in state.players){
       var player = state.players[sessionId];
       for(var i = 0; i < player.segments.length; i++){
@@ -87,9 +101,19 @@ window.SnakeRenderer = (function(){
         }
       }
     }
-
     for(var i = this.segmentPoolIndex; i < this.segmentPool.length; i++)
       this.segmentPool[i].visible = false;
+
+    this.foodPoolIndex = 0;
+    for(var i = 0; state.food && i < state.food.length; i++){
+      var foodState = state.food[i],
+          coords = foodState.center,
+          food = this.getFood();
+      food.position.set(coords.x, coords.y, coords.z);
+      food.visible = true;
+    }
+    for(var i = this.foodPoolIndex; i < this.foodPool.length; i++)
+      this.foodPool[i].visible = false;
     
     this.renderer.render(this.scene, this.camera);
   };

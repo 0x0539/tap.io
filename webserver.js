@@ -7,9 +7,10 @@ var Parameters = {
   baseurl: 'http://localhost:7787',
   socketio: 'http://localhost:9585',
   scripts: [
-    '/lib/shared/utilities.js',
-    '/lib/shared/engine.js',
     '/lib/shared/parameters.js',
+    '/lib/shared/utilities.js',
+    '/lib/shared/random.js',
+    '/lib/shared/engine.js',
     '/lib/shared/freed/vector3.js',
     '/lib/shared/freed/cache.js',
     '/lib/shared/freed/plane.js',

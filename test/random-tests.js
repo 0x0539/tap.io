@@ -8,7 +8,11 @@ describe('Random', function(){
   });
 
   it('should return 0.27090452108404856 on the first call with seed "cheese monkey"', function(){
-    assert.equal(new this.Random('cheese monkey').random(), 0.27090452108404856);
+    assert.equal(new this.Random().seed('cheese monkey').random(), 0.27090452108404856);
+  });
+
+  it('should have a default seed of "cheese monkey"', function(){
+    assert.equal(new this.Random().random(), new this.Random('cheese monkey').random());
   });
 
   it('should return the same results on the first few calls', function(){
@@ -21,14 +25,14 @@ describe('Random', function(){
   });
 
   it('should seed from the constructor', function(){
-    var r1 = new this.Random('hapablap'),
+    var r1 = new this.Random().seed('hapablap'),
         r2 = new this.Random();
     assert.notEqual(r1.random(), r2.random());
   });
 
   it('should return the same results on the first few calls after seeding', function(){
-    var r1 = new this.Random('hapablap'),
-        r2 = new this.Random('hapablap');
+    var r1 = new this.Random().seed('hapablap'),
+        r2 = new this.Random().seed('hapablap');
     assert.equal(r1.random(), r2.random());
     assert.equal(r1.random(), r2.random());
     assert.equal(r1.random(), r2.random());
@@ -49,6 +53,13 @@ describe('Random', function(){
     r1.random();
     r1.seed('winchester');
     r2.seed('winchester');
+    assert.equal(r1.random(), r2.random());
+  });
+
+  it('should allow bootstrapping of random data', function(){
+    var r1 = new this.Random('this shit cray');
+    r1.random();
+    var r2 = new this.Random().bootstrap(r1.arc4);
     assert.equal(r1.random(), r2.random());
   });
 });

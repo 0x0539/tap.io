@@ -61,5 +61,7 @@ describe('Random', function(){
     r1.random();
     var r2 = new this.Random().bootstrap(r1.arc4);
     assert.equal(r1.random(), r2.random());
+    assert.equal(r1.random(), r2.random());
+    assert.equal(r1.random(), r2.random());
   });
 });

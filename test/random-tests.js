@@ -7,6 +7,10 @@ describe('Random', function(){
     done();
   });
 
+  it('should return 0.27090452108404856 on the first call with seed "cheese monkey"', function(){
+    assert.equal(new this.Random('cheese monkey').random(), 0.27090452108404856);
+  });
+
   it('should return the same results on the first few calls', function(){
     var r1 = new this.Random(),
         r2 = new this.Random();

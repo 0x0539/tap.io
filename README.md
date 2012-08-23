@@ -64,10 +64,8 @@ of your game (*deterministic* physics and event handling). Here is a skeleton ex
 of the snake game in example/snake you can look at):
 
 ```
-// define exports namespace for clients if it does not exist
-if(typeof exports == 'undefined') window.exports = {};
-
-exports.SnakeEngine = (function(){
+// window || exports allows cross platform export of namespace
+(window || exports).SnakeEngine = (function(){
 
   var SnakeEngine = {};
 
@@ -108,8 +106,9 @@ twice already...  For our purposes, deterministic means that, when given input s
 **always** return B. Never C.  Whether it is running on node.js or Chrome or (should it ever get WebGL) IE, 
 it should always return B.
 
-That means no Math.random(). To have randomness, you should use server-generated events backed by Math.random() until 
-I can provide a suitable replacement for the Math.random() function.  
+I provide a replacement for Math.random() that is deterministic across platforms. It is mostly a butchered
+version of http://davidbau.com/encode/seedrandom.js. I take care to seed the random function for you. I will
+describe how to access this API once it has been solidified.
 
 #### handle(state, event)
 
@@ -121,14 +120,15 @@ if(event.data.type == 'spawnMonster')
   state.monsters.push({type: event.data.monsterType, x: event.data.monsterX, y: event.data.monsterY});
 ```
 
-This code should also be deterministic. As much fun as I have explaining what that means, I'll refrain 
-from insulting your intellect by doing so again.
+This code should also be deterministic.
 
 #### validate(state, event)
 
 This function should throw an exception if **event** is invalid, given the **state**. This can be used, 
 for example, to prevent users from modifying each others positions by checking to see if
 **event.senderSessionId** (secure field set by the server) matches *event.data.playerId**.
+
+This code should also be deterministic in its throwing of errors.
 
 ### Task 2. Renderer
 
@@ -141,7 +141,7 @@ window.SnakeRenderer = (function(){
 
   var SnakeRenderer = function(){ };
 
-  SnakeRenderer.prototype.render = function(sessionId, state){
+  SnakeRenderer.prototype.render = function(playerSessionId, state){
     // rendar!
   };
 
@@ -150,7 +150,8 @@ window.SnakeRenderer = (function(){
 })();
 ```
 
-The render() function takes the sessionId of the user you are rendering for, and the entire game state.
+The render() function takes the playerSessionId of the user you are rendering for (so that you can
+adjust the camera), and the entire game state.
 
 #### Quick Rant
 
@@ -170,23 +171,26 @@ we can guarantee that we have received all events that occurred before it, on th
 Here is what a server wrapper might look like (taken from example/snake/server/snake.js):
 
 ```
-// server-only dependencies
-var network = require('../../../lib/server/network.js');
-var game = require('../../../lib/server/game.js');
+// required at the top of every file, allows us to use the (window || exports) idiom in node.js files (otherwise
+// you will get "window is undefined" errors
+global.window = false;
 
-// shared dependencies
-var engine = require('../../../lib/shared/engine.js');
-var snake = require('../shared/snake-engine.js');
+// server-only dependencies
+var Network = require('../../../lib/server/network.js').Network,
+    Game = require('../../../lib/server/game.js').Game,
+    Engine = require('../../../lib/shared/engine.js').Engine,
+    FREED = require('../../../lib/shared/freed/freed.js').FREED,
+    SnakeEngine = require('../shared/snake-engine.js').SnakeEngine;
 
 // plug in game engine
-engine.Engine.plugins.push(snake.SnakeEngine);
+Engine.plugins.push(SnakeEngine);
 
 // start the networking
-var server = new network.Network(9585);
+var server = new Network(9585);
 server.start();
 
 // start the game manager
-var game = new game.Game(server);
+var game = new Game(server);
 game.start();
 ```
 
@@ -206,7 +210,6 @@ Here is what your client wrapper might look like (taken from example/snake/clien
         height: 768;
         margin: auto;
         border: 2px solid;
-        border-radius: 25px;
       }
     </style>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js" ></script>
@@ -216,12 +219,30 @@ Here is what your client wrapper might look like (taken from example/snake/clien
     <% } %>
     <script type="text/javascript" defer="defer">
       $(function(){
-        exports.Engine.plugins.push(exports.SnakeEngine);
+        window.Engine.plugins.push(window.SnakeEngine);
 
         var socket = window.io.connect('<%= socketio %>'),
             game = new window.Game(socket),
             renderer = new window.SnakeRenderer(),
             renderLoop = new window.RenderLoop(game, renderer);
+
+        $('html,body').on('keyup', function(e){
+          switch(e.which){
+            case 38:
+              game.emit('gameevent', {type: 'keyNorth'});
+              break;
+            case 40:
+              game.emit('gameevent', {type: 'keySouth'});
+              break;
+            case 37:
+              game.emit('gameevent', {type: 'keyWest'});
+              break;
+            case 39:
+              game.emit('gameevent', {type: 'keyEast'});
+              break;
+          }
+        });
+      });
     </script>
   </head>
   <body>

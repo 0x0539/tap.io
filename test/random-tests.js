@@ -56,12 +56,40 @@ describe('Random', function(){
     assert.equal(r1.random(), r2.random());
   });
 
-  it('should allow wrapping of random data by Random objects', function(){
+  it('should allow wrapping of arc4 data by Random objects', function(){
     var r1 = new this.Random('this shit cray'),
         r2 = new this.Random('this shit cray'),
         r3 = new this.Random().wrap(r1.arc4);
     assert.equal(r1.random(), r2.random());
     assert.equal(r3.random(), r2.random());
     assert.equal(r1.random(), r2.random());
+  });
+
+  it('should return itself when calling wrap', function(){
+    var r = new this.Random('this shit cray');
+    assert.equal(r, r.wrap({}));
+  });
+
+  it('should return itself when calling seed', function(){
+    var r = new this.Random();
+    assert.equal(r, r.seed('blah'));
+  });
+
+  it('should throw an error when calling wrap with null', function(){
+    assert.throws(function(){
+      new this.Random().wrap(null);
+    });
+    assert.throws(function(){
+      new this.Random().wrap();
+    });
+  });
+
+  it('should throw an error when calling seed with null', function(){
+    assert.throws(function(){
+      new this.Random().seed(null);
+    });
+    assert.throws(function(){
+      new this.Random().seed();
+    });
   });
 });

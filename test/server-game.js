@@ -22,12 +22,11 @@ describe('server/Game', function(){
 
   it('should construct without exceptions using the base network mock', function(){
     var game = new this.Game(buildNetworkMock());
-    assert.deepEqual(game.state, {
-      clock: 0,
-      vt: 0,
-      events: [],
-      sessionIds: [0]
-    });
+    assert.equal(game.state.clock, 0);
+    assert.equal(game.state.vt, 0);
+    assert.deepEqual(game.state.events, []);
+    assert.deepEqual(game.state.sessionIds, [0]);
+    assert.notEqual(game.state.arc4, null);
   });
 
   it('should not allow an empty or null network', function(){
@@ -60,7 +59,8 @@ describe('server/Game', function(){
         vt: 3,
         events: [{a: 2}, {b: 3}],
         clock: 5,
-        sessionIds: [0, 1, 2]
+        sessionIds: [0, 1, 2],
+        arc4: {}
       };
     };
 
@@ -110,6 +110,17 @@ describe('server/Game', function(){
           dis = this;
 
       baseState.sessionIds = null;
+
+      assert.throws(function(){
+        new dis.Game(buildNetworkMock(), baseState);
+      });
+    });
+
+    it('should raise an error if arc4 is undefined', function(){
+      var baseState = buildBaseState(),
+          dis = this;
+
+      baseState.arc4 = null;
 
       assert.throws(function(){
         new dis.Game(buildNetworkMock(), baseState);

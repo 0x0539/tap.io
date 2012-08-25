@@ -15,7 +15,8 @@
   var SnakeEngine = {
     speed: 2,
     radius: 10,
-    foodRadius: 8
+    foodRadius: 8,
+    gap: 30
   };
 
   var sameSide = function(a, b, p, x, y){
@@ -72,7 +73,7 @@
     };
 
     for(var y = 3; y > 0; y--){
-      var center = FREED.Vector3(30*y, 30, 0),
+      var center = FREED.Vector3(this.gap*y, 40, 0),
           sphere = FREED.Sphere(center, this.radius);
 
       player.segments.push({
@@ -94,15 +95,17 @@
     if(this.xyPlane == null)
       this.xyPlane = FREED.Plane(FREED.Vector3(0, 0, 1), FREED.Vector3(0, 0, 0));
 
-    // spawn an apple
-    if(state.vt % Utilities.ms2ticks(1000) == 0){
+    // initialize
+    state.food = state.food || [];
+
+    // spawn foods
+    if(state.food.length < 5){
       var x = Math.floor(randall.random() * (this.faceBucket.r - this.faceBucket.l)),
           y = Math.floor(randall.random() * (this.faceBucket.t - this.faceBucket.b)),
           z = 40,
           center = FREED.Vector3(x, y, z),
           sphere = FREED.Sphere(center, this.foodRadius);
       this.floatSphere(state.terrain, sphere);
-      state.food = state.food || [];
       state.food.push(sphere);
     }
 
@@ -116,6 +119,26 @@
         // remove from path if already there
         while(path.length && FREED.Vector3.equals(center, path[0]))
           path.shift();
+
+        // eat food
+        for(var f = 0; f < state.food.length; f++){
+          if(FREED.Sphere.overlaps(state.food[f], segment.sphere)){
+            state.food = Utilities.spliceIndex(state.food, f);
+            var lastSegment = player.segments[player.segments.length - 1],
+                newSphere = FREED.Sphere.copy(lastSegment.sphere),
+                newPath = [FREED.Vector3.copy(lastSegment.sphere.center)];
+
+            for(var p = 0; p < lastSegment.path.length; p++)
+              newPath.push(FREED.Vector3.copy(lastSegment.path[p]));
+
+            FREED.Vector3.subSelf(newSphere.center, FREED.Vector3(0, this.gap, 0));
+
+            player.segments.push({
+              sphere: newSphere,
+              path: newPath
+            });
+          }
+        }
 
         // if we still have a destination, move to it
         if(path.length){

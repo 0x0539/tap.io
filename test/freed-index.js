@@ -7,6 +7,8 @@ describe('FREED Index', function(){
     done();
   });
 
+  /*
+
   describe('constructor', function(){
     it('should assign the id counter to 0', function(){
       assert.equal(new this.Index().id, 0);
@@ -188,4 +190,5 @@ describe('FREED Index', function(){
       assert.equal(this.index.dirty, false);
     });
   });
+  */
 });

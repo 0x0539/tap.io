@@ -9,6 +9,8 @@ var Parameters = {
   scripts: [
     '/lib/shared/parameters.js',
     '/lib/shared/utilities.js',
+    '/lib/shared/serializer.js',
+    '/lib/shared/cloner.js',
     '/lib/shared/random.js',
     '/lib/shared/engine.js',
     '/lib/shared/freed/vector3.js',

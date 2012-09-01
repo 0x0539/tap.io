@@ -147,4 +147,21 @@ describe('Serializer', function(){
     assert.equal(true, this.Serializer.deserialize(this.Serializer.serialize(true)));
   });
 
+  it('should be able to serialize and deserialize undefined\'s', function(){
+    var a;
+    assert.equal('undefined', typeof this.Serializer.deserialize(this.Serializer.serialize(a)));
+  });
+
+  it('should be able to handle undefined fields in objects', function(){
+    var a,
+        b = {a: a};
+    assert.deepEqual(b, this.Serializer.deserialize(this.Serializer.serialize(b)));
+  });
+
+  it('should be able to handle undefined values in arrays', function(){
+    var a,
+        b = [a, 1, a];
+    assert.deepEqual(b, this.Serializer.deserialize(this.Serializer.serialize(b)));
+  });
+
 });

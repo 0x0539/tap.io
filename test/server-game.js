@@ -1,7 +1,8 @@
 var assert = require('assert'),
     reload = require('./reload.js'),
     Utilities = require('../lib/shared/utilities.js').Utilities,
-    Parameters = require('../lib/shared/parameters.js').Parameters;
+    Parameters = require('../lib/shared/parameters.js').Parameters,
+    Serializer = require('../lib/shared/serializer.js').Serializer;
 
 describe('server/Game', function(){
   var buildNetworkMock = function(){
@@ -160,7 +161,7 @@ describe('server/Game', function(){
       network.send = function(sessionId, type, data){
         assert.equal(sessionId, 3);
         assert.equal('bootstrap', type);
-        assert.deepEqual({state: game.state, sessionId: sessionId}, data);
+        assert.deepEqual(Serializer.serialize({state: game.state, sessionId: sessionId}), data);
         called.push('send');
       };
 

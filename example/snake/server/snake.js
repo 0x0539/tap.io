@@ -28,6 +28,11 @@ for(var i = 0; i < cols; i++){
   }
 }
 
+game.state.terrain.minX = 0;
+game.state.terrain.maxX = (cols-1)*scale;
+game.state.terrain.minY = 0;
+game.state.terrain.maxY = (rows-1)*scale;
+
 for(var i = 0; i < cols - 1; i++){
   for(var j = 0; j < rows - 1; j++){
     var v = i*rows + j,

@@ -66,14 +66,19 @@
       center.z = maxZ;
   };
 
-  SnakeEngine.buildNewPlayer = function(){
+  SnakeEngine.buildNewPlayer = function(state){
     var player = {
-      direction: 'east',
+      direction: 'west',
       segments: []
     };
 
-    for(var y = 3; y > 0; y--){
-      var center = FREED.Vector3(this.gap*y, 40, 0),
+    var w = state.terrain.maxX - state.terrain.minX,
+        h = state.terrain.maxY - state.terrain.minY,
+        cX = w * randall.random(),
+        cY = h * randall.random();
+
+    for(var y = 0; y < 3; y++){
+      var center = FREED.Vector3(cX + this.gap * y, cY, 0),
           sphere = FREED.Sphere(center, this.radius);
 
       player.segments.push({
@@ -196,7 +201,7 @@
     }
 
     for(var sessionId in killList)
-      state.players[sessionId] = this.buildNewPlayer();
+      state.players[sessionId] = this.buildNewPlayer(state);
   };
 
   SnakeEngine.validate = function(state, event){
@@ -207,7 +212,7 @@
     switch(event.type){
       case 'startSession':
         state.players = state.players || {};
-        state.players[event.data.sessionId] = this.buildNewPlayer();
+        state.players[event.data.sessionId] = this.buildNewPlayer(state);
         break;
       case 'endSession':
         delete state.players[event.data.sessionId];

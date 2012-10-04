@@ -2,13 +2,12 @@
   <head>
     <style>
       div {
-        width: 1024;
-        height: 768;
+        width: 1300;
+        height: 400;
         margin: auto;
         border: 2px solid;
       }
     </style>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js" ></script>
     <script type="text/javascript" src="<%= socketio %>/socket.io/socket.io.js" ></script>
     <% for(var i = 0; i < scripts.length; i++){ %>
       <script type="text/javascript" src="<%= baseurl %><%= scripts[i] %>" ></script>

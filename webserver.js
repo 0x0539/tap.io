@@ -24,6 +24,7 @@ var Parameters = {
     '/example/snake/shared/snake-engine.js',
     '/example/snake/client/snake-renderer.js',
     '/lib/vendor/three.min.js',
+    '/lib/vendor/jquery.js',
     '/lib/client/raf.js',
     '/lib/client/game.js',
     '/lib/client/render-loop.js',

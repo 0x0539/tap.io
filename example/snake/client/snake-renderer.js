@@ -8,8 +8,8 @@ window.SnakeRenderer = (function(){
 
     this.scene.add(this.light);
 
-    this.width = 1024;
-    this.height = 768;
+    this.width = 1300;
+    this.height = 400;
     this.cameraDistance = 400;
 
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 2000);
@@ -35,7 +35,7 @@ window.SnakeRenderer = (function(){
       return;
 
     geometry = new THREE.Geometry();
-    geometry.materials = [new THREE.MeshLambertMaterial({color: 0xCC0000})];
+    geometry.materials = [new THREE.MeshLambertMaterial({color: 0x246300})];
 
     for(var v = 0; v < state.terrain.vertices.length; v++){
       var vertex = state.terrain.vertices[v],
@@ -61,7 +61,7 @@ window.SnakeRenderer = (function(){
     if(this.segmentPoolIndex >= this.segmentPool.length){
       var newSegment = new THREE.Mesh(
         new THREE.SphereGeometry(window.SnakeEngine.radius),
-        new THREE.MeshLambertMaterial({color: 0x00ff00})
+        new THREE.MeshLambertMaterial({color: 0xCC0000})
       );
       this.segmentPool.push(newSegment);
       this.scene.add(newSegment);

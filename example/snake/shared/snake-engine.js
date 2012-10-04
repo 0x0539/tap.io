@@ -109,8 +109,13 @@
       state.food.push(sphere);
     }
 
+    
+    var doneList = {}, // players who have already had collision detection done
+        killList = {}; // players to kill at the end of the collision detection/update
+
     for(var sessionId in state.players){
       var player = state.players[sessionId];
+
       for(var i = 0; i < player.segments.length; i++){
         var segment = player.segments[i],
             center = segment.sphere.center,
@@ -170,8 +175,28 @@
         }
 
         this.floatSphere(state.terrain, segment.sphere);
+
+        // flag player as done so that we don't waste processing time by detecting collisions again
+        doneList[sessionId] = true;
+
+        // do collisions
+        for(var otherSessionId in state.players){
+          if(doneList[otherSessionId])
+            continue;
+          var otherPlayer = state.players[otherSessionId];
+          for(var j = 0; j < otherPlayer.segments.length; j++){
+            var otherSegment = otherPlayer.segments[j];
+            if(FREED.Sphere.overlaps(segment.sphere, otherSegment.sphere)){
+              if(i == 0) killList[sessionId] = true;
+              if(j == 0) killList[otherSessionId] = true;
+            }
+          }
+        }
       }
     }
+
+    for(var sessionId in killList)
+      state.players[sessionId] = this.buildNewPlayer();
   };
 
   SnakeEngine.validate = function(state, event){

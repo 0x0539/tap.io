@@ -88,6 +88,7 @@
 
   SnakeEngine.buildNewPlayer = function(state){
     var player = {
+      name: 'anonymous',
       direction: 'west',
       segments: [],
       kills: 0,
@@ -256,6 +257,9 @@
           case 'keyNorth':
             if(player.direction != 'north' && player.direction != 'south')
               player.direction = 'north';
+            break;
+          case 'nameChange':
+            player.name = event.data.newName;
             break;
         }
 

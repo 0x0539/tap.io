@@ -90,7 +90,7 @@ window.SnakeRenderer = (function(){
       var player = state.players[sessionId];
 
       $('<tr class="player"></tr>')
-        .append('<td>' + sessionId + '</td>')
+        .append('<td>' + player.name + '</td>')
         .append('<td>' + player.kills + '</td>')
         .append('<td>' + player.deaths + '</td>')
         .append('<td>' + player.maxLength + '</td>')

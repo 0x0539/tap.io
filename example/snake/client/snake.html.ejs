@@ -40,6 +40,12 @@
               break;
           }
         });
+
+        $('input#nickname').on('change', function(){
+          var nickname = $(this).val();
+          if(nickname.trim().length > 0)
+            game.emit('gameevent', {type: 'nameChange', newName: nickname});
+        });
       });
     </script>
   </head>
@@ -49,5 +55,6 @@
     <table class="scoreboard">
       <tr><td>Player</td><td>Kills</td><td>Deaths</td><td>Maximum Length</td></tr>
     </table>
+    <input type="text" id="nickname" placeholder="Nickname" />
   </body>
 </html>

@@ -1,11 +1,22 @@
 <html>
   <head>
     <style>
-      div {
-        width: 1300;
-        height: 400;
-        margin: auto;
-        border: 2px solid;
+      div.game {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+      div.popup {
+        width: 400px;
+        height: 400px;
+        margin: -200px 0 0 -200px;
+        position: fixed;
+        z-index: 2;
+        left: 50%;
+        top: 50%;
+        background: #ffffff;
       }
     </style>
     <script type="text/javascript" src="<%= socketio %>/socket.io/socket.io.js" ></script>
@@ -21,7 +32,7 @@
             renderer = new window.SnakeRenderer(),
             renderLoop = new window.RenderLoop(game, renderer);
 
-        $('html,body').on('keyup', function(e){
+        $('body').on('keyup', function(e){
           switch(e.which){
             case 38:
               game.emit('gameevent', {type: 'keyNorth'});
@@ -34,6 +45,13 @@
               break;
             case 39:
               game.emit('gameevent', {type: 'keyEast'});
+              break;
+            case 81:
+              console.log('heyhey');
+              if($('div.popup').is(':visible'))
+                $('div.popup').hide();
+              else
+                $('div.popup').show();
               break;
             default:
               console.log('you hit ' + e.which);
@@ -52,9 +70,11 @@
   <body>
     <div class="game">
     </div>
-    <table class="scoreboard">
-      <tr><td>Player</td><td>Kills</td><td>Deaths</td><td>Maximum Length</td></tr>
-    </table>
-    <input type="text" id="nickname" placeholder="Nickname" />
+    <div class="popup">
+      <table class="scoreboard">
+        <tr><td>Player</td><td>Kills</td><td>Deaths</td><td>Maximum Length</td></tr>
+      </table>
+      <input type="text" id="nickname" placeholder="Nickname" />
+    </div>
   </body>
 </html>

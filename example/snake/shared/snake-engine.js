@@ -101,6 +101,22 @@
     return player;
   };
 
+  SnakeEngine.outOfBounds = function(player, state){
+    if(player.segments == null || player.segments.length == 0)
+      return false;
+    var head = player.segments[0].sphere,
+        minX = head.center.x - head.radius,
+        maxX = head.center.x + head.radius,
+        minY = head.center.y - head.radius,
+        maxY = head.center.y + head.radius;
+    return (
+      minX <= state.terrain.minX || 
+      minY <= state.terrain.minY || 
+      maxX >= state.terrain.maxX || 
+      maxY >= state.terrain.maxY
+    );
+  };
+
   SnakeEngine.update = function(state){
 
     randall.wrap(state.arc4);
@@ -127,13 +143,17 @@
 
     
     var doneList = {}, // players who have already had collision detection done
-        killList = {}; // players to kill at the end of the collision detection/update
+        killList = {},
+        suicideList = {}; // players to kill at the end of the collision detection/update
 
     for(var sessionId in state.players){
       var player = state.players[sessionId];
 
       // track max player length
       player.maxLength = Math.max(player.maxLength, player.segments.length);
+
+      if(this.outOfBounds(player, state))
+        suicideList[sessionId] = true;
 
       for(var i = 0; i < player.segments.length; i++){
         var segment = player.segments[i],
@@ -219,6 +239,12 @@
           killer = state.players[killList[sessionId]];
       player.deaths++;
       killer.kills++;
+      this.resetPlayerPosition(player, state);
+    }
+
+    for(var sessionId in suicideList){
+      var player = state.players[sessionId];
+      player.deaths++;
       this.resetPlayerPosition(player, state);
     }
   };

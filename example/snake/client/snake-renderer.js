@@ -8,16 +8,16 @@ window.SnakeRenderer = (function(){
 
     this.scene.add(this.light);
 
-    this.width = 1300;
-    this.height = 400;
     this.cameraDistance = 400;
 
-    this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 2000);
-    this.camera.position.set(0, 0, this.cameraDistance);
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-
     this.renderer = new THREE.WebGLRenderer({antialias: true});
-    this.renderer.setSize(this.width, this.height);
+
+    this.updateCameraParameters();
+
+    var dis = this;
+    $(window).on('resize', function(e){
+      dis.updateCameraParameters();
+    });
 
     this.segmentPool = [];
     this.segmentPoolIndex = 0;
@@ -26,6 +26,13 @@ window.SnakeRenderer = (function(){
     this.foodPoolIndex = 0;
 
     $('div.game').append(this.renderer.domElement);
+  };
+
+  SnakeRenderer.prototype.updateCameraParameters = function(){
+    var w = window.innerWidth,
+        h = window.innerHeight;
+    this.renderer.setSize(w, h);
+    this.camera = new THREE.PerspectiveCamera(45, w / h, 1, 2000);
   };
 
   SnakeRenderer.prototype.constructTerrain = function(state){

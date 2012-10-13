@@ -29,8 +29,8 @@ window.SnakeRenderer = (function(){
   };
 
   SnakeRenderer.prototype.updateCameraParameters = function(){
-    var w = window.innerWidth,
-        h = window.innerHeight;
+    var w = window.innerWidth - 20,
+        h = window.innerHeight - 20;
     this.renderer.setSize(w, h);
     this.camera = new THREE.PerspectiveCamera(45, w / h, 1, 2000);
   };

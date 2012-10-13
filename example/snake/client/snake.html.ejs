@@ -3,8 +3,8 @@
     <style>
       div.game {
         position: fixed;
-        top: 0;
-        left: 0;
+        top: 10px;
+        left: 10px;
         bottom: 0;
         right: 0;
       }
@@ -17,6 +17,14 @@
         left: 50%;
         top: 50%;
         background: #ffffff;
+        display: none;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table, th, td {
+        border: 1px solid black;
       }
     </style>
     <script type="text/javascript" src="<%= socketio %>/socket.io/socket.io.js" ></script>
@@ -47,7 +55,6 @@
               game.emit('gameevent', {type: 'keyEast'});
               break;
             case 81:
-              console.log('heyhey');
               if($('div.popup').is(':visible'))
                 $('div.popup').hide();
               else
@@ -61,7 +68,7 @@
 
         $('input#nickname').on('change', function(){
           var nickname = $(this).val();
-          if(nickname.trim().length > 0)
+          if(nickname.trim().length)
             game.emit('gameevent', {type: 'nameChange', newName: nickname});
         });
       });

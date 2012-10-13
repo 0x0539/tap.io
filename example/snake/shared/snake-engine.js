@@ -66,16 +66,14 @@
       center.z = maxZ;
   };
 
-  SnakeEngine.buildNewPlayer = function(state){
-    var player = {
-      direction: 'west',
-      segments: []
-    };
-
+  SnakeEngine.resetPlayerPosition = function(player, state){
     var w = state.terrain.maxX - state.terrain.minX,
         h = state.terrain.maxY - state.terrain.minY,
         cX = w * randall.random(),
         cY = h * randall.random();
+
+    player.direction = 'west';
+    player.segments = [];
 
     for(var y = 0; y < 3; y++){
       var center = FREED.Vector3(cX + this.gap * y, cY, 0),
@@ -86,6 +84,18 @@
         path: []
       });
     }
+  };
+
+  SnakeEngine.buildNewPlayer = function(state){
+    var player = {
+      direction: 'west',
+      segments: [],
+      kills: 0,
+      deaths: 0,
+      maxLength: 0
+    };
+
+    this.resetPlayerPosition(player, state);
 
     return player;
   };
@@ -120,6 +130,9 @@
 
     for(var sessionId in state.players){
       var player = state.players[sessionId];
+
+      // track max player length
+      player.maxLength = Math.max(player.maxLength, player.segments.length);
 
       for(var i = 0; i < player.segments.length; i++){
         var segment = player.segments[i],
@@ -192,16 +205,21 @@
           for(var j = 0; j < otherPlayer.segments.length; j++){
             var otherSegment = otherPlayer.segments[j];
             if(FREED.Sphere.overlaps(segment.sphere, otherSegment.sphere)){
-              if(i == 0) killList[sessionId] = true;
-              if(j == 0) killList[otherSessionId] = true;
+              if(i == 0) killList[sessionId] = otherSessionId;
+              if(j == 0) killList[otherSessionId] = sessionId;
             }
           }
         }
       }
     }
 
-    for(var sessionId in killList)
-      state.players[sessionId] = this.buildNewPlayer(state);
+    for(var sessionId in killList){
+      var player = state.players[sessionId],
+          killer = state.players[killList[sessionId]];
+      player.deaths++;
+      killer.kills++;
+      this.resetPlayerPosition(player, state);
+    }
   };
 
   SnakeEngine.validate = function(state, event){

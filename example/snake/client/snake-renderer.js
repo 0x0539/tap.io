@@ -25,9 +25,7 @@ window.SnakeRenderer = (function(){
     this.foodPool = [];
     this.foodPoolIndex = 0;
 
-    this.container = document.createElement('div');
-    this.container.appendChild(this.renderer.domElement);
-    document.body.appendChild(this.container);
+    $('div.game').append(this.renderer.domElement);
   };
 
   SnakeRenderer.prototype.constructTerrain = function(state){
@@ -83,11 +81,21 @@ window.SnakeRenderer = (function(){
 
   SnakeRenderer.prototype.render = function(playerSessionId, state){
 
+    $('tr.player').remove();
+
     this.constructTerrain(state);
 
     this.segmentPoolIndex = 0;
     for(var sessionId in state.players){
       var player = state.players[sessionId];
+
+      $('<tr class="player"></tr>')
+        .append('<td>' + sessionId + '</td>')
+        .append('<td>' + player.kills + '</td>')
+        .append('<td>' + player.deaths + '</td>')
+        .append('<td>' + player.maxLength + '</td>')
+        .appendTo('table');
+
       for(var i = 0; i < player.segments.length; i++){
         var coords = player.segments[i].sphere.center,
             segment = this.getSegment();

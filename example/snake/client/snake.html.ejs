@@ -35,11 +35,19 @@
             case 39:
               game.emit('gameevent', {type: 'keyEast'});
               break;
+            default:
+              console.log('you hit ' + e.which);
+              break;
           }
         });
       });
     </script>
   </head>
   <body>
+    <div class="game">
+    </div>
+    <table class="scoreboard">
+      <tr><td>Player</td><td>Kills</td><td>Deaths</td><td>Maximum Length</td></tr>
+    </table>
   </body>
 </html>

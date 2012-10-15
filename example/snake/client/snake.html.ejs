@@ -1,39 +1,48 @@
 <html>
   <head>
     <style>
+      body {
+        font: 12px normal Arial,Helvetica,sans-serif;
+        color: white;
+      }
       div.game {
+        background: #003;
         position: fixed;
         top: 10px;
         left: 10px;
-        bottom: 0;
-        right: 0;
+        bottom: 9px;
+        right: 9px;
+        border: 1px solid black;
       }
       div.popup {
         width: 400px;
-        height: 400px;
         margin: -200px 0 0 -200px;
         position: fixed;
         z-index: 2;
         left: 50%;
         top: 50%;
-        background: #ffffff;
+        background: rgba(0,0,0,.8);
         display: none;
+        border: 1px solid black;
+      }
+      #nickname {
+        margin-left: 10px;
+        margin-bottom: 10px;
       }
       table {
+        margin: 10px;
         border-collapse: collapse;
-        width: 100%;
-      }
-      table, th, td {
-        border: 1px solid black;
+        width: 380px;
       }
       .help {
         position: fixed;
         left: 20px;
         top: 20px;
-        background: #ffffff;
+        background: rgba(0,0,0,.8);
         z-index: 5;
         margin: 0;
         padding: 10px;
+        border: 1px solid black;
       }
       .help li {
         list-style: none;
@@ -87,7 +96,7 @@
           }
         });
 
-        $('input#nickname').on('change', function(){
+        $('.popup').on('change', '#nickname', function(){
           var nickname = $(this).val();
           if(nickname.trim().length)
             game.emit('gameevent', {type: 'nameChange', newName: nickname});
@@ -99,11 +108,10 @@
     <div class="game">
     </div>
     <div class="popup">
-      <h2 class="message">Scoreboard</h2>
       <table class="scoreboard">
         <tr><td>Player</td><td>Kills</td><td>Deaths</td><td>Maximum Length</td></tr>
       </table>
-      <input type="text" id="nickname" placeholder="Nickname" />
+      <input type="text" id="nickname" placeholder="Change Nickname" />
     </div>
     <ul class="help">
       <li>Press "q" to open scoreboard</li>

@@ -67,10 +67,11 @@
   };
 
   SnakeEngine.resetPlayerPosition = function(player, state){
-    var w = state.terrain.maxX - state.terrain.minX,
-        h = state.terrain.maxY - state.terrain.minY,
-        cX = w * randall.random(),
-        cY = h * randall.random(),
+    var margin = this.gap * 3 + this.radius,
+        w = state.terrain.maxX - state.terrain.minX - margin * 2,
+        h = state.terrain.maxY - state.terrain.minY - margin * 2,
+        cX = w * randall.random() + margin,
+        cY = h * randall.random() + margin,
         df = Math.floor(randall.random() * 4),
         dx = 0,
         dy = 0;

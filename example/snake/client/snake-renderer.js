@@ -78,7 +78,7 @@ window.SnakeRenderer = (function(){
     if(this.foodPoolIndex >= this.foodPool.length){
       var newFood = new THREE.Mesh(
         new THREE.SphereGeometry(window.SnakeEngine.foodRadius),
-        new THREE.MeshLambertMaterial({color: 0x0000ff})
+        new THREE.MeshLambertMaterial({color: 0xffff00})
       );
       this.foodPool.push(newFood);
       this.scene.add(newFood);

@@ -103,17 +103,21 @@ window.SnakeRenderer = (function(){
         .append('<td>' + player.maxLength + '</td>')
         .appendTo('table');
 
+      if(player.segments.length && sessionId == playerSessionId){
+        var coords = player.segments[0].sphere.center;
+        this.camera.position.set(coords.x, coords.y - 100, this.cameraDistance);
+        this.camera.lookAt(coords);
+      }
+
+      if(player.dead)
+        continue;
+
       for(var i = 0; i < player.segments.length; i++){
         var coords = player.segments[i].sphere.center,
             segment = this.getSegment();
 
         segment.position.set(coords.x, coords.y, coords.z);
         segment.visible = true;
-
-        if(i == 0 && sessionId == playerSessionId){
-          this.camera.position.set(coords.x, coords.y - 100, this.cameraDistance);
-          this.camera.lookAt(segment.position);
-        }
       }
     }
     for(var i = this.segmentPoolIndex; i < this.segmentPool.length; i++)

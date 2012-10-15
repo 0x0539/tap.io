@@ -26,6 +26,11 @@
       table, th, td {
         border: 1px solid black;
       }
+      .help {
+        position: fixed;
+        background: #ffffff;
+        z-index: 5;
+      }
     </style>
     <script type="text/javascript" src="<%= socketio %>/socket.io/socket.io.js" ></script>
     <% for(var i = 0; i < scripts.length; i++){ %>
@@ -54,11 +59,20 @@
             case 39:
               game.emit('gameevent', {type: 'keyEast'});
               break;
-            case 81:
+            case 81: // q
               if($('div.popup').is(':visible'))
                 $('div.popup').hide();
               else
                 $('div.popup').show();
+              break;
+            case 82: // r
+              game.emit('gameevent', {type: 'resurrect'});
+              break;
+            case 72: // h
+              if($('.help').is(':visible'))
+                $('.help').hide();
+              else
+                $('.help').show();
               break;
             default:
               console.log('you hit ' + e.which);
@@ -78,10 +92,16 @@
     <div class="game">
     </div>
     <div class="popup">
+      <h2 class="message">Scoreboard</h2>
       <table class="scoreboard">
         <tr><td>Player</td><td>Kills</td><td>Deaths</td><td>Maximum Length</td></tr>
       </table>
       <input type="text" id="nickname" placeholder="Nickname" />
     </div>
+    <ul class="help">
+      <li>Press "q" to open scoreboard</li>
+      <li>Press "r" to resurrect</li>
+      <li>Press "h" to toggle help</li>
+    </ul>
   </body>
 </html>

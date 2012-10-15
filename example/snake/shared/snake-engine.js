@@ -70,13 +70,26 @@
     var w = state.terrain.maxX - state.terrain.minX,
         h = state.terrain.maxY - state.terrain.minY,
         cX = w * randall.random(),
-        cY = h * randall.random();
+        cY = h * randall.random(),
+        df = Math.floor(randall.random() * 4),
+        dx = 0,
+        dy = 0;
 
-    player.direction = 'west';
+    switch(df){
+      case 0: player.direction = 'west';  dx =  1; break;
+      case 1: player.direction = 'east';  dx = -1; break;
+      case 2: player.direction = 'north'; dy = -1; break;
+      case 3: player.direction = 'south'; dy =  1; break;
+    }
+
     player.segments = [];
 
-    for(var y = 0; y < 3; y++){
-      var center = FREED.Vector3(cX + this.gap * y, cY, 0),
+    for(var i = 0; i < 3; i++){
+      var center = FREED.Vector3(
+            cX + this.gap * i * dx, 
+            cY + this.gap * i * dy, 
+            0
+          ),
           sphere = FREED.Sphere(center, this.radius);
 
       player.segments.push({
@@ -90,6 +103,7 @@
     var player = {
       name: 'anonymous',
       direction: 'west',
+      dead: false,
       segments: [],
       kills: 0,
       deaths: 0,
@@ -148,6 +162,9 @@
 
     for(var sessionId in state.players){
       var player = state.players[sessionId];
+
+      if(player.dead == true)
+        continue;
 
       // track max player length
       player.maxLength = Math.max(player.maxLength, player.segments.length);
@@ -220,9 +237,12 @@
 
         // do collisions
         for(var otherSessionId in state.players){
+          var otherPlayer = state.players[otherSessionId];
           if(doneList[otherSessionId])
             continue;
-          var otherPlayer = state.players[otherSessionId];
+          // skip dead players
+          if(otherPlayer.dead == true)
+            continue;
           for(var j = 0; j < otherPlayer.segments.length; j++){
             var otherSegment = otherPlayer.segments[j];
             if(FREED.Sphere.overlaps(segment.sphere, otherSegment.sphere)){
@@ -239,13 +259,13 @@
           killer = state.players[killList[sessionId]];
       player.deaths++;
       killer.kills++;
-      this.resetPlayerPosition(player, state);
+      player.dead = true;
     }
 
     for(var sessionId in suicideList){
       var player = state.players[sessionId];
       player.deaths++;
-      this.resetPlayerPosition(player, state);
+      player.dead = true;
     }
   };
 
@@ -287,11 +307,24 @@
           case 'nameChange':
             player.name = event.data.newName;
             break;
+          case 'resurrect':
+            if(player.dead == true){
+              player.dead = false;
+              this.resetPlayerPosition(player, state);
+            }
+            break;
         }
 
-        // save head location in segment paths
-        for(var i = 1; i < player.segments.length; i++)
-          player.segments[i].path.push(FREED.Vector3.copy(head.sphere.center));
+        switch(event.data.type){
+          case 'keyWest':
+          case 'keyEast':
+          case 'keySouth':
+          case 'keyNorth':
+            // save head location in segment paths
+            for(var i = 1; i < player.segments.length; i++)
+              player.segments[i].path.push(FREED.Vector3.copy(head.sphere.center));
+            break;
+        }
 
         break;
     }

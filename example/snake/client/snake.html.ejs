@@ -27,15 +27,15 @@
         border: 1px solid black;
       }
     </style>
-    <script type="text/javascript" src="<%= socketio %>/socket.io/socket.io.js" ></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js" ></script>
     <% for(var i = 0; i < scripts.length; i++){ %>
-      <script type="text/javascript" src="<%= baseurl %><%= scripts[i] %>" ></script>
+      <script type="text/javascript" src="<%= scripts[i] %>" ></script>
     <% } %>
     <script type="text/javascript" defer="defer">
       $(function(){
         window.Engine.plugins.push(window.SnakeEngine);
 
-        var socket = window.io.connect('<%= socketio %>'),
+        var socket = window.io.connect(window.location.hostname),
             game = new window.Game(socket),
             renderer = new window.SnakeRenderer(),
             renderLoop = new window.RenderLoop(game, renderer);

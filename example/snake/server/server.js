@@ -4,8 +4,6 @@ var HTTP = require('http'),
     EJS = require('ejs');
 
 var Parameters = {
-  baseurl: 'http://snakeio',
-  socketio: 'http://snakeio',
   scripts: [
     '/lib/shared/parameters.js',
     '/lib/shared/utilities.js',

@@ -4,8 +4,8 @@ var HTTP = require('http'),
     EJS = require('ejs');
 
 var Parameters = {
-  baseurl: 'http://localhost:7787',
-  socketio: 'http://localhost:9585',
+  baseurl: 'http://snakeio',
+  socketio: 'http://snakeio',
   scripts: [
     '/lib/shared/parameters.js',
     '/lib/shared/utilities.js',
@@ -21,13 +21,13 @@ var Parameters = {
     '/lib/shared/freed/geometry.js',
     '/lib/shared/freed/facebucket.js',
     '/lib/shared/freed/freed.js',
-    '/example/snake/shared/snake-engine.js',
-    '/example/snake/client/snake-renderer.js',
     '/lib/vendor/three.min.js',
     '/lib/vendor/jquery-1.8.2.min.js',
     '/lib/client/raf.js',
     '/lib/client/game.js',
     '/lib/client/render-loop.js',
+    '/example/snake/shared/snake-engine.js',
+    '/example/snake/client/snake-renderer.js',
   ]
 };
 
@@ -86,14 +86,14 @@ var respondWithFile = function(path, response, contentType, map){
 
 var handlers = {
   snake: function(request, response){
-    respondWithFile('./example/snake/client/snake.html.ejs', response, 'text/html', function(data){
+    respondWithFile('../client/snake.html.ejs', response, 'text/html', function(data){
       return EJS.render(data, Parameters);
     });
   },
   jsfile: function(request, response){
     var url = URL.parse(request.url),
         path = url.pathname;
-    respondWithFile('.' + path, response, 'text/javascript');
+    respondWithFile('../../../' + path, response, 'text/javascript');
   }
 };
 
@@ -119,4 +119,51 @@ var server = HTTP.createServer(function(request, response){
   }
 });
 
-server.listen(7787);
+server.listen(80);
+
+global.window = false;
+
+// server-only dependencies
+var Network = require('../../../lib/server/network.js').Network,
+    Game = require('../../../lib/server/game.js').Game,
+    Engine = require('../../../lib/shared/engine.js').Engine,
+    FREED = require('../../../lib/shared/freed/freed.js').FREED,
+    SnakeEngine = require('../shared/snake-engine.js').SnakeEngine;
+
+// plug in game engine
+Engine.plugins.push(SnakeEngine);
+
+// start the networking
+var socket = new Network(server);
+socket.start();
+
+// start the game manager
+var game = new Game(socket);
+
+game.state.terrain = FREED.Geometry();
+
+var cols = 30, rows = 30, scale = 30;
+for(var i = 0; i < cols; i++){
+  for(var j = 0; j < rows; j++){
+    var z1 = scale*Math.sin(Math.sqrt(i*i + j*j)),
+        z2 = 2*scale*Math.sin(Math.sqrt((rows-i)*(rows-i) + j*j));
+    game.state.terrain.vertices.push(FREED.Vector3(i*scale, j*scale, z1 + z2));
+  }
+}
+
+game.state.terrain.minX = 0;
+game.state.terrain.maxX = (cols-1)*scale;
+game.state.terrain.minY = 0;
+game.state.terrain.maxY = (rows-1)*scale;
+
+for(var i = 0; i < cols - 1; i++){
+  for(var j = 0; j < rows - 1; j++){
+    var v = i*rows + j,
+        f1 = FREED.Face3(v, v+rows+1, v+1, game.state.terrain),
+        f2 = FREED.Face3(v, v+rows, v+rows+1, game.state.terrain);
+    game.state.terrain.faces.push(f1);
+    game.state.terrain.faces.push(f2);
+  }
+}
+
+game.start();

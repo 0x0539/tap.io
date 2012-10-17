@@ -64,12 +64,12 @@ var respondWithFile = function(path, response, contentType, map){
   FS.stat(path, function(error, stat){
 
     if(error != null){
-      respondWith(response, 500, 'text/plain', error.toString());
+      respondWith(response, 500, 'text/plain', 'could not stat file: ' + error.toString());
     }
     else if(stat.isFile()){
       FS.readFile(path, 'utf8', function(error, data){
         if(error != null)
-          respondWith(response, 500, 'text/plain', error.toString());
+          respondWith(response, 500, 'text/plain', 'could not read file: ' + error.toString());
         else{
           data = map == null ? data : map(data);
           respondWith(response, 200, contentType, data);
@@ -77,21 +77,21 @@ var respondWithFile = function(path, response, contentType, map){
       });
     }
     else{
-      respondWith(response, 404, 'text/plain', 'Error: resource is not a file');
+      respondWith(response, 404, 'text/plain', 'Error: ' + path + ' is not a file');
     }
   });
 };
 
 var handlers = {
   snake: function(request, response){
-    respondWithFile('../client/snake.html.ejs', response, 'text/html', function(data){
+    respondWithFile('./example/snake/client/snake.html.ejs', response, 'text/html', function(data){
       return EJS.render(data, Parameters);
     });
   },
   jsfile: function(request, response){
     var url = URL.parse(request.url),
         path = url.pathname;
-    respondWithFile('../../../' + path, response, 'text/javascript');
+    respondWithFile('.' + path, response, 'text/javascript');
   }
 };
 

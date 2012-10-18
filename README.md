@@ -112,23 +112,25 @@ It is based on the RNG implementation at http://davidbau.com/encode/seedrandom.j
 
 #### handle(state, event)
 
-This function should process the given event and alter the state according to the mechanics of your game. For example,
-if your game has a *spawnMonster* event, your code might look like this:
+The handle function is called to apply "events" to the game state. Your implementation should process the event, updating the game state
+according according to the mechanics of your game. 
+
+For example, your implementation might contain something like the following:
 
 ```
 if(event.data.type == 'spawnMonster')
   state.monsters.push({type: event.data.monsterType, x: event.data.monsterX, y: event.data.monsterY});
 ```
 
-This code should also be deterministic.
+This function must be deterministic.
 
 #### validate(state, event)
 
-This function should throw an exception if **event** is invalid, given the **state**. This can be used, 
+The handle function should throw an exception if **event** is invalid, given the **state**. This can be used, 
 for example, to prevent users from modifying each others positions by checking to see if
 **event.senderSessionId** (secure field set by the server) matches *event.data.playerId**.
 
-This code should also be deterministic in its throwing of errors.
+This function must be deterministic (careful that errors are thrown deterministically).
 
 ### Task 2. Renderer
 

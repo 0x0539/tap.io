@@ -126,7 +126,7 @@ This function must be deterministic.
 
 #### validate(state, event)
 
-The handle function should throw an exception if **event** is invalid, given the **state**. This can be used, 
+The validate function should throw an exception if **event** is invalid, given the **state**. This can be used, 
 for example, to prevent users from modifying each others positions by checking to see if
 **event.senderSessionId** (secure field set by the server) matches *event.data.playerId**.
 

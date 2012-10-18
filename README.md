@@ -92,7 +92,7 @@ The game engine extension api is broken down into three functions: update, handl
 
 #### update(state)
 
-This function should perform an *in place* update of the state object, according to the rules of your game. That
+The update function should perform an *in place* update of the state object, according to the rules of your game. That
 means, for example, it could contain code like the following:
 
 ```
@@ -102,13 +102,13 @@ for(var i = 0; i < state.players.length; i++)
 ```
 
 Note, it is crucial that the results of this function are deterministic! I may have mentioned that once or 
-twice already...  For our purposes, deterministic means that, when given input state A, the function should 
-**always** return B. Never C.  Whether it is running on node.js or Chrome or (should it ever get WebGL) IE, 
-it should always return B.
+twice already...  For our purposes, deterministic means that, when given input state A, the update function should 
+**always** result in output state B. Never C.  Whether it is running on node.js or Chrome or (should it ever get WebGL) IE, 
+it should always result in B.
 
-I provide a replacement for Math.random() that is deterministic across platforms. It is mostly a butchered
-version of http://davidbau.com/encode/seedrandom.js. I take care to seed the random function for you. I will
-describe how to access this API once it has been solidified.
+I provide a replacement for Math.random() that can be used when randomness is desired. It works by folding the random number
+generator state into the actual game state. That means consistent, distributed random number generation is possible.
+It is based on the RNG implementation at http://davidbau.com/encode/seedrandom.js. I will add more documentation on this function later.
 
 #### handle(state, event)
 

@@ -1,3 +1,7 @@
+News
+====
+10-2012: The example game is live, with free hosting by nodejitsu. Head on over to http://bumbleskunk.tap.io.jit.su/
+
 Browser-based Multiplayer Games with tap.io
 ===========================================
 

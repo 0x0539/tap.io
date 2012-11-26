@@ -1,103 +1,59 @@
 News
 ====
-10-2012: The example game is live, with free hosting by nodejitsu. Head on over to http://bumbleskunk.tap.io.jit.su/
+10-2012: The example game is live, with hosting by nodejitsu. Head on over to http://bumbleskunk.tap.io.jit.su/
 
 Browser-based Multiplayer Games with tap.io
 ===========================================
 
-Platform for building browser-based multiplayer games. This is all possible thanks to the recent 
-explosion of innovation in browser technology, e.g. WebSockets, WebGL, and socket.io.
+Platform for building browser-based simulations/games. This is all possible thanks to the recent 
+explosion of innovation in browser technology, including WebSockets, WebGL, and socket.io.
 
-Tap.io game servers are built on socket.io and node.js. Clients also live on the socket.io platform, and
-can use anything (WebGL, canvas, jQuery) to render the game.
-
-Features
-========
-
-Here are some of the features tap.io is striving for:
-
-### Shared Code Between Server and Client
-
-A great deal of the codebase is shared between server and client (see /lib/shared). This 
-includes the core game engine and just about everything except rendering (client-only) 
-and networking (client and server function differently).
-
-This means more reliable results and 1/2 the tests.
-
-### Efficient Use of Bandwidth
-
-Once a client has been initialized, communication is kept to a minimum. Only essential information
-is exchanged -- tiny event messages from clients (such as keyboard input events) and server-side events 
-such as spawning monsters. Additionally, all communication is done over WebSockets (if supported 
-by the browser), which reduces the overhead of repeatedly establishing TCP connections when compared
-to protocols such as HTTP. 
-
-### State as Pure Data
-
-The state of the game is represented as pure data, and the game engine as stateless functions that
-operate on that data. This clean separation allows us to do tricky things like update a client by
-sending them a single JSON object without worrying about serialization, etc. It also means we can
-persist the game state on disk in human readable form.
-
-It is possible that users will be able to exploit the human-readability of game data. For example, you could
-find out which chest to open merely by running a ```console.log(game.state.whereDatGold)``` in the javascript 
-console. That problem may need to be solved by exposing other API's for the game, though I certainly hope
-another solution presents itself.
-
-### Large Test Suite
-
-I aim to provide a large amount of test coverage for this platform (though it seems like a given in these
-days of TDD).
+Tap.io systems use socket.io for communication. They can use anything (WebGL, canvas, jQuery) to render the game.
 
 Working with tap.io
 ===================
 
-When developing on tap.io, you will implement a couple things:
+To get you started with tap.io, there is an example game in ```example/snake```. The project is structured into three
+subdirectories:
 
-1. Game-specific physics and event handling (code shared between client and server)
-2. Game state rendering (client only)
-3. Server code that instantiates your socket.io server
-4. Client html to load the game
+1. ```example/snake/shared/```: contains engine code shared by the client and server, the meat of the application
+2. ```example/snake/client/```: contains client-only code, the render javascript and the html file that hosts the game
+3. ```example/snake/server/```: contains server-only code, the socket.io app which also serves client code over http
 
-There are well-defined interfaces for 1 and 2. Details on all tasks, as well as information on how to 
-run the example, are all provided below.
+I'll walk through the example, which will hopefully get you started on your way to building your own tap.io game.
 
-### Task 1. Game Engine
-The game engine extension is javascript code that is shared between client and server. It contains the logic
-of your game (*deterministic* physics and event handling). Here is a skeleton example (there is a full implementation
-of the snake game in example/snake you can look at):
+### Writing an Engine
+
+There is only one source file for the snake engine, ```example/snake/shared/snake-engine.js```. It defines an
+object called ```SnakeEngine``` that contains all the logic of the game. The declaration looks like this:
 
 ```
-// window || exports allows cross platform export of namespace
 (window || exports).SnakeEngine = (function(){
-
-  var SnakeEngine = {};
-
-  SnakeEngine.update = function(state){ 
-    // handle game physics deterministally
-  };
-
-  
-  SnakeEngine.handle = function(state, event){ 
-    // handle a single event deterministically
-  };
-
-  
-  SnakeEngine.validate = function(state, event){ 
-    // validate an event, throw exception if invalid (used to enforce security policies, etc)
-  };
-
-  return SnakeEngine;
-
+  ...
 })();
 ```
 
-The game engine extension api is broken down into three functions: update, handle, and validate.
+**Note:** You may be confused by the ```(window || exports).``` idiom. I use it to write javascript that can run on 
+both server AND client.  When this javascript executes on a browser, ```window``` exists so ```window.SnakeEngine``` 
+gets defined. When we are running in node.js, ```window``` does not exist so ```exports.SnakeEngine``` gets 
+defined. Node.js developers will recognize that the exports object is how you export functionality from a node module.
 
-#### update(state)
+The SnakeEngine object exposes three important functions:
 
-The update function should perform an *in place* update of the state object, according to the rules of your game. That
-means, for example, it could contain code like the following:
+1. update(state) function
+2. validate(state, event) function
+3. handle(state, event) function
+
+Every game must have an object that implements these interfaces; it is a core part of the tap.io API.
+
+#### Engine.update(state)
+
+The Engine.update(state) function takes an input/output parameter **state** that is the entire state of the game.
+It performs an **in-place** update of this state according to the rules of your game.  Put a different way, 
+the Engine.update(state) function takes an input state and applies one timestep of physics to it.
+
+For example, if your game has the notion of gravity, it would go in the Engine.update(state) function. You might
+have some code like this:
 
 ```
 for(var i = 0; i < state.players.length; i++)
@@ -105,25 +61,31 @@ for(var i = 0; i < state.players.length; i++)
     state.players[i].y -= 10;
 ```
 
-Note, it is crucial that the results of this function are deterministic! I may have mentioned that once or 
-twice already...  For our purposes, deterministic means that, when given input state A, the update function should 
-**always** result in output state B. Never C.  Whether it is running on node.js or Chrome or (should it ever get WebGL) IE, 
-it should always result in B.
+**Determinism!** It is crucial that the results of this function be deterministic. For our purposes, deterministic 
+means that two different clients executing the update function with the same input state should arrive at the 
+same output state.  You may be wondering how to implement randomness under this constraint. Not to worry, there is 
+an API for that. I'll get into it later.
 
-I provide a replacement for Math.random() that can be used when randomness is desired. It works by folding the random number
-generator state into the actual game state. That means consistent, distributed random number generation is possible.
-It is based on the RNG implementation at http://davidbau.com/encode/seedrandom.js. I will add more documentation on this function later.
+#### Engine.handle(state, event)
 
-#### handle(state, event)
+The handle function takes an input/output parameter **state** and an **event** to be applied to that state.
+It performs an **in-place** update of the state according to the nature of the **event**.
 
-The handle function is called to apply "events" to the game state. Your implementation should process the event, updating the game state
-according according to the mechanics of your game. 
-
-For example, your implementation might contain something like the following:
+For example, user input is modeled with events. I'll explain how to emit these events later. For now, 
+just worry about handling them in your engine. The Engine.handle(state, event) function might contain
+something like this:
 
 ```
-if(event.data.type == 'spawnMonster')
-  state.monsters.push({type: event.data.monsterType, x: event.data.monsterX, y: event.data.monsterY});
+if(event.type == 'gameevent'){
+  switch(event.data.type){
+    case 'keyDown':
+      state.players[event.data.sessionId].yVelocity += 1;
+      break;
+    case 'keyUp':
+      state.players[event.data.sessionId].yVelocity -= 1;
+      break;
+  }
+}
 ```
 
 This function must be deterministic.

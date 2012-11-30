@@ -105,7 +105,7 @@ for example, to prevent users from modifying each others positions by checking t
 
 This function must be deterministic (careful that errors are thrown deterministically).
 
-### Server
+### Writing a Server
 
 You also need to implement a node.js application! Remember, tap.io is just a framework;
 it does not attempt to provide a node.js server application for you. This gives you more flexibility.
@@ -147,7 +147,7 @@ game.start();
 
 I will try to package this boilerplate stuff more nicely at some later date.
 
-### Client
+### Writing a Client
 
 Being browser based, clients require some JS in order to get the game to load. It's up to you to figure
 out how to serve these files to them. For the snake game I made the node.js application aware of

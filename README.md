@@ -149,8 +149,8 @@ I will try to package this boilerplate stuff more nicely at some later date.
 
 ### Writing a Client
 
-Being browser based, clients require some JS in order to get the game to load. It's up to you to figure
-out how to serve these files to them. For the snake game I made the node.js application aware of
+Being browser based, clients require some JS/HTML in order to get the game to load. It's up to you to figure
+out how to serve this content to them. For the snake game I made the node.js application aware of
 the client files so that it could serve them over HTTP. I recommend this approach.
 
 The first thing you have to do is get the socket.io javascript. Usually, it is a script tag like this:

@@ -10,6 +10,13 @@ explosion of innovation in browser technology, including WebSockets, WebGL, and 
 
 Tap.io systems use socket.io for communication. They can use anything (WebGL, canvas, jQuery) to render the game.
 
+Running the Example
+===================
+After cloning the repository, you should run ```node webserver.js``` and ```node example/snake/server/snake.js```.
+The ```webserver.js``` is the HTTP interface to the game files, and ```snake.js``` is the server wrapper.
+
+Now you should be able to hit http://localhost:7787/snake.html in a couple different windows and see what happens.
+
 Working with tap.io
 ===================
 
@@ -200,10 +207,3 @@ window.SnakeRenderer = (function(){
 
 The render() function takes the playerSessionId of the user you are rendering for (so that you can
 adjust the camera), and the game state.
-
-Running the Example
-===================
-After cloning the repository, you should run ```node webserver.js``` and ```node example/snake/server/snake.js```.
-The ```webserver.js``` is the HTTP interface to the game files, and ```snake.js``` is the server wrapper.
-
-Now you should be able to hit http://localhost:7787/snake.html in a couple different windows and see what happens.

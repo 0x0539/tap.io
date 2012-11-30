@@ -159,9 +159,11 @@ The first thing you have to do is get the socket.io javascript. Usually, it is a
 <script type="text/javascript" src="http://your.socket.server/socket.io/socket.io.js"></script>
 ```
 
-The next thing you have to do is include every script under lib/shared. I know that's a lot of script tags.
-One day, I plan to provide a single JS file containing all of the tap.io scripts. For now, just include 
-everything separately.
+The next thing you have to do is include every script under lib/shared *in addition to* any shared code
+you have implemented for your game. 
+
+I know that's a lot of script tags.  One day, I plan to provide a single JS file containing all of the 
+tap.io scripts. For now, just include everything separately.
 
 After you've included the necessary scripts, you'll need to execute some JS to get the game running:
 

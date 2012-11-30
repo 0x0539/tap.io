@@ -16,16 +16,16 @@ Working with tap.io
 To get you started with tap.io, there is an example game in ```example/snake```. The project is structured into three
 subdirectories:
 
-1. ```example/snake/shared/```: contains engine code shared by the client and server, the meat of the application
-2. ```example/snake/client/```: contains client-only code, the render javascript and the html file that hosts the game
-3. ```example/snake/server/```: contains server-only code, the socket.io app which also serves client code over http
+1. ```shared```: contains engine code shared by the client and server, the meat of the application
+2. ```client```: contains client-only code, the render javascript and the html file that hosts the game
+3. ```server```: contains server-only code, the socket.io app which also serves client code over http
 
 I'll walk through the example, which will hopefully get you started on your way to building your own tap.io game.
 
 ### Writing an Engine
 
-There is only one source file for the snake engine, ```example/snake/shared/snake-engine.js```. It defines an
-object called ```SnakeEngine``` that contains all the logic of the game. The declaration looks like this:
+There is only one shared file, ```shared/snake-engine.js```. It implements all the logic of the game. It defines an
+object called ```SnakeEngine``` that meets a specific engine interface required by the framework.
 
 ```
 (window || exports).SnakeEngine = (function(){
@@ -98,11 +98,91 @@ for example, to prevent users from modifying each others positions by checking t
 
 This function must be deterministic (careful that errors are thrown deterministically).
 
-### Task 2. Renderer
+### Server
 
-The second component you have to implement is the rendering engine, how your game actually shows up 
-in the browser. Essentially, you will need to have some kind of object with a render function.
-Here is an example skeleton from the snake project (see example/snake for a complete implementation):
+You also need to implement a node.js application! Remember, tap.io is just a framework;
+it does not attempt to provide a node.js server application for you. This gives you more flexibility.
+I might at some point provide users with a default server implementation.
+
+You can find the server for the snake game in ```server/snake-engine.js```. It is essentially a node.js server 
+that hosts client files over http and invokes the tap.io framework. Here are the steps you will have to take:
+
+```
+var server = require('http').createServer(function(){ // serve ordinary http requests here });
+server.listen(80);
+
+// please include this line for safety
+global.window = false;
+
+// require framework libraries
+var Network = require('../../../lib/server/network.js').Network,
+    Game = require('../../../lib/server/game.js').Game,
+    Engine = require('../../../lib/shared/engine.js').Engine,
+    SnakeEngine = require('../shared/snake-engine.js').SnakeEngine; // <-- your engine implementation!
+
+// plug in game engine
+Engine.plugins.push(SnakeEngine);
+
+// start the networking
+var socket = new Network(server);
+socket.start();
+
+// start the game manager
+var game = new Game(socket);
+
+// ...
+// initialize game.state here
+// ...
+
+// start the game itself
+game.start();
+```
+
+I will try to package this boilerplate stuff more nicely at some later date.
+
+### Client
+
+Being browser based, clients require some JS in order to get the game to load. It's up to you to figure
+out how to serve these files to them. For the snake game I made the node.js application aware of
+the client files so that it could serve them over HTTP. I recommend this approach.
+
+The first thing you have to do is get the socket.io javascript. Usually, it is a script tag like this:
+
+```
+<script type="text/javascript" src="http://your.socket.server/socket.io/socket.io.js"></script>
+```
+
+The next thing you have to do is include every script under lib/shared. I know that's a lot of <script> tags.
+One day, I plan to provide a single JS file containing all of the tap.io scripts. For now, just include 
+everything separately.
+
+After you've included the necessary scripts, you'll need to execute some JS to get the game running:
+
+```
+window.Engine.plugins.push(window.SnakeEngine); // <-- your engine implementation
+
+var socket = window.io.connect(window.location.hostname),
+    game = new window.Game(socket),
+    renderer = new window.SnakeRenderer(), // <-- your renderer implementation
+    renderLoop = new window.RenderLoop(game, renderer);
+```
+
+I'll explain the renderer in the next section.
+
+Now you will actually need to know how to emit events, e.g. in response to user input. It's really simple, 
+actually. Just use code like this:
+
+```
+var eventData = {...};
+game.emit('gameevent', eventData);
+```
+
+When you process the event in your engine, eventData can be accessed under event.data.
+
+#### Renderer
+
+To get the game to actually show up in the browser, you have to implement a renderer.  The interface is simple,
+it is an object with a render function.  Here is an example from the snake project:
 
 ```
 window.SnakeRenderer = (function(){
@@ -119,112 +199,7 @@ window.SnakeRenderer = (function(){
 ```
 
 The render() function takes the playerSessionId of the user you are rendering for (so that you can
-adjust the camera), and the entire game state.
-
-#### Quick Rant
-
-The render function is actually rendering ```game.projectedState```, which is an
-*optimistic*, *real-time* view of the game state. It is *optimistic* because the projected state
-may be inconsistent with other clients. Inconsistencies in projected states occur when events are received that
-have virtual timestamps less than virtual clock time (which moves forward at ~30 ticks per second). 
-It is *real-time* because the projected state is our best guess at what the true state is at virtual clock time. 
-Remember, we might not yet have received all events with virtual timestamps less than virtual clock time.
-
-Internally, this works by maintaining a separate copy of the game state: a past state that is known 
-to be consistent and all events received since. That other copy only gets 'bumped forward' when
-we can guarantee that we have received all events that occurred before it, on the virtual timeline.
-
-### Task 3. Server Wrapper
-
-Here is what a server wrapper might look like (taken from example/snake/server/snake.js):
-
-```
-// required at the top of every file, allows us to use the (window || exports) idiom in node.js files (otherwise
-// you will get "window is undefined" errors
-global.window = false;
-
-// server-only dependencies
-var Network = require('../../../lib/server/network.js').Network,
-    Game = require('../../../lib/server/game.js').Game,
-    Engine = require('../../../lib/shared/engine.js').Engine,
-    FREED = require('../../../lib/shared/freed/freed.js').FREED,
-    SnakeEngine = require('../shared/snake-engine.js').SnakeEngine;
-
-// plug in game engine
-Engine.plugins.push(SnakeEngine);
-
-// start the networking
-var server = new Network(9585);
-server.start();
-
-// start the game manager
-var game = new Game(server);
-game.start();
-```
-
-This is the entry point to your socket.io server. It requires all the server modules and shared engine
-code, and starts the server.
-
-### Task 4. Client Wrapper
-
-Here is what your client wrapper might look like (taken from example/snake/client/home.html.ejs):
-
-```
-<html>
-  <head>
-    <style>
-      div {
-        width: 1024;
-        height: 768;
-        margin: auto;
-        border: 2px solid;
-      }
-    </style>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js" ></script>
-    <script type="text/javascript" src="<%= socketio %>/socket.io/socket.io.js" ></script>
-    <% for(var i = 0; i < scripts.length; i++){ %>
-      <script type="text/javascript" src="<%= baseurl %><%= scripts[i] %>" ></script>
-    <% } %>
-    <script type="text/javascript" defer="defer">
-      $(function(){
-        window.Engine.plugins.push(window.SnakeEngine);
-
-        var socket = window.io.connect('<%= socketio %>'),
-            game = new window.Game(socket),
-            renderer = new window.SnakeRenderer(),
-            renderLoop = new window.RenderLoop(game, renderer);
-
-        $('html,body').on('keyup', function(e){
-          switch(e.which){
-            case 38:
-              game.emit('gameevent', {type: 'keyNorth'});
-              break;
-            case 40:
-              game.emit('gameevent', {type: 'keySouth'});
-              break;
-            case 37:
-              game.emit('gameevent', {type: 'keyWest'});
-              break;
-            case 39:
-              game.emit('gameevent', {type: 'keyEast'});
-              break;
-          }
-        });
-      });
-    </script>
-  </head>
-  <body>
-  </body>
-</html>
-```
-
-Basically, it sets up all the script tags your client will need, and constructs step-by-step the 
-different components necessary for the game to run:
-
-- a socket.io socket
-- a window.Game (see lib/client/game.js)
-- a window.SnakeRenderer (your renderer implementation)
-- a window.RenderLoop (invokes your animation stuffs)
+adjust the camera), and the game state.
 
 Running the Example
 ===================
@@ -232,5 +207,3 @@ After cloning the repository, you should run ```node webserver.js``` and ```node
 The ```webserver.js``` is the HTTP interface to the game files, and ```snake.js``` is the server wrapper.
 
 Now you should be able to hit http://localhost:7787/snake.html in a couple different windows and see what happens.
-I plan on hosting a live demo of this soon.
-

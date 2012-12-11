@@ -29,7 +29,7 @@ I'll walk through the example, which will hopefully get you started on your way 
 
 ### Writing an Engine
 
-There is only one shared file, ```shared/snake-engine.js```. It implements all the logic of the game. It defines an
+In this example, there is only one shared file, ```shared/snake-engine.js```. It implements all the logic of the game. It defines an
 object called ```SnakeEngine``` that meets a specific engine interface required by the framework.
 
 ```

@@ -5,17 +5,15 @@ News
 Browser-based Multiplayer Games with tap.io
 ===========================================
 
-Platform for building browser-based simulations/games. This is all possible thanks to the recent 
+Platform for building browser-based, distributed simulations/games. This is all possible thanks to the recent 
 explosion of innovation in browser technology, including WebSockets, WebGL, and socket.io.
 
 Tap.io systems use socket.io for communication. They can use anything (WebGL, canvas, jQuery) to render the game.
 
 Running the Example
 ===================
-After cloning the repository, you should run ```node webserver.js``` and ```node example/snake/server/snake.js```.
-The ```webserver.js``` is the HTTP interface to the game files, and ```snake.js``` is the server wrapper.
-
-Now you should be able to hit http://localhost:7787/snake.html in a couple different windows and see what happens.
+After cloning the repository, you should run ```node example/snake/server/server.js```.  Now you should be 
+able to hit http://localhost:7787/snake.html in a couple different windows and see what happens.
 
 Working with tap.io
 ===================

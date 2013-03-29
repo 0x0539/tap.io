@@ -64,16 +64,16 @@
         $('body').on('keyup', function(e){
           switch(e.which){
             case 38:
-              game.emit('gameevent', {type: 'keyNorth'});
+              game.sendGameEvent({type: 'keyNorth'});
               break;
             case 40:
-              game.emit('gameevent', {type: 'keySouth'});
+              game.sendGameEvent({type: 'keySouth'});
               break;
             case 37:
-              game.emit('gameevent', {type: 'keyWest'});
+              game.sendGameEvent({type: 'keyWest'});
               break;
             case 39:
-              game.emit('gameevent', {type: 'keyEast'});
+              game.sendGameEvent({type: 'keyEast'});
               break;
             case 81: // q
               if($('div.popup').is(':visible'))
@@ -82,7 +82,7 @@
                 $('div.popup').show();
               break;
             case 82: // r
-              game.emit('gameevent', {type: 'resurrect'});
+              game.sendGameEvent({type: 'resurrect'});
               break;
             case 72: // h
               if($('.help').is(':visible'))
@@ -99,7 +99,7 @@
         $('.popup').on('change', '#nickname', function(){
           var nickname = $(this).val();
           if(nickname.trim().length)
-            game.emit('gameevent', {type: 'nameChange', newName: nickname});
+            game.sendGameEvent({type: 'nameChange', newName: 'nickname'});
         });
       });
     </script>

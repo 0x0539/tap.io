@@ -277,14 +277,14 @@
 
   SnakeEngine.handle = function(state, event){
     switch(event.type){
-      case Events.NEW_CONNECTION:
+      case Events.NEW_SESSION:
         state.players = state.players || {};
         state.players[event.data.sessionId] = this.buildNewPlayer(state);
         break;
       case Events.LOST_CONNECTION:
         delete state.players[event.data.sessionId];
         break;
-      case Events.GAME_EVENT:
+      case Events.CUSTOM:
         var player = state.players[event.senderSessionId],
             head = player.segments[0];
 

@@ -142,8 +142,8 @@ describe('server/Game', function(){
       var game = new this.Game(buildNetworkMock(), baseState);
 
       assert.equal(baseState.events.length, 4);
-      assert.deepEqual(baseState.events[2], {type: Events.CONNECTION_LOST, senderSessionId: 0, data: {sessionId: 1}, vt: game.state.clock});
-      assert.deepEqual(baseState.events[3], {type: Events.CONNECTION_LOST, senderSessionId: 0, data: {sessionId: 2}, vt: game.state.clock});
+      assert.deepEqual(baseState.events[2], {type: Events.END_SESSION, senderSessionId: 0, data: {sessionId: 1}, vt: game.state.clock});
+      assert.deepEqual(baseState.events[3], {type: Events.END_SESSION, senderSessionId: 0, data: {sessionId: 2}, vt: game.state.clock});
     });
   });
 

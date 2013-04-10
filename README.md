@@ -18,19 +18,17 @@ able to hit http://localhost:7787/snake.html in a couple different windows and s
 Working with tap.io
 ===================
 
-To get you started with tap.io, there is an example game in ```example/snake```. The project is structured into three
+To get started with tap.io, there is an example game in ```example/snake```. The project is structured into three
 subdirectories:
 
 1. ```shared```: contains engine code shared by the client and server, the meat of the application
 2. ```client```: contains client-only code, the render javascript and the html file that hosts the game
 3. ```server```: contains server-only code, the socket.io app which also serves client code over http
 
-I'll walk through the example, which will hopefully get you started on your way to building your own tap.io game.
-
 ### Writing an Engine
 
-In this example, there is only one shared file, ```shared/snake-engine.js```. It implements all the logic of the game. It defines an
-object called ```SnakeEngine``` that meets a specific engine interface required by the framework.
+In the example game, there is only one shared file, ```shared/snake-engine.js```. It implements all the logic 
+of the game. It defines an object called ```SnakeEngine``` that meets a specific engine interface required by the framework.
 
 ```
 (window || exports).SnakeEngine = (function(){
@@ -38,10 +36,10 @@ object called ```SnakeEngine``` that meets a specific engine interface required 
 })();
 ```
 
-**Note:** You may be confused by the ```(window || exports).``` idiom. I use it to write javascript that can run on 
-both server AND client.  When this javascript executes on a browser, ```window``` exists so ```window.SnakeEngine``` 
-gets defined. When we are running in node.js, ```window``` does not exist so ```exports.SnakeEngine``` gets 
-defined. Node.js developers will recognize that the exports object is how you export functionality from a node module.
+**Note:** You may be confused by the ```(window || exports).``` idiom. It is used to write javascript that can run on 
+both server AND client.  When it executes on a browser, ```window``` exists so ```window.SnakeEngine``` 
+gets defined. When it executes in node.js, ```window``` does not exist so ```exports.SnakeEngine``` gets 
+defined. Node.js developers will recognize that the exports object is the standard way to export functionality from a node module.
 
 The SnakeEngine object exposes three important functions:
 
@@ -49,51 +47,63 @@ The SnakeEngine object exposes three important functions:
 2. validate(state, event) function
 3. handle(state, event) function
 
-Every game must have an object that implements these interfaces; it is a core part of the tap.io API.
+Every game must have at least one object that implements these interfaces.
 
 #### Engine.update(state)
 
 The Engine.update(state) function takes an input/output parameter **state** that is the entire state of the game.
-It performs an **in-place** update of this state according to the rules of your game.  Put a different way, 
+It performs an **in-place** update of this state according to the game rules.  Put a different way, 
 the Engine.update(state) function takes an input state and applies one timestep of physics to it.
 
-For example, if your game has the notion of gravity, it would go in the Engine.update(state) function. You might
-have some code like this:
+For example, if the game has the notion of gravity, the gravity physics would take place in the Engine.update(state) 
+function. It might look like this
 
 ```
-for(var i = 0; i < state.players.length; i++)
-  if(state.players[i].falling == true)
-    state.players[i].y -= 10;
+MyEngine.update = function(state){
+  // some stuff...
+
+  // gravity
+  for(var i = 0; i < state.players.length; i++)
+    if(state.players[i].falling == true)
+      state.players[i].y -= 10;
+
+  // more stuff...
+};
 ```
 
-**Determinism!** It is crucial that the results of this function be deterministic. For our purposes, deterministic 
+**Determinism!** It is crucial that the results of this function be deterministic. For tap.io purposes, deterministic 
 means that two different clients executing the update function with the same input state should arrive at the 
-same output state.  You may be wondering how to implement randomness under this constraint. Not to worry, there is 
-an API for that. I'll get into it later.
+same output state.  This does not mean it is impossible for your game to use pseudo-random numbers. An ARC4 RNG is 
+included in tap.io whose state is folded into the overall game state, allowing clients to generate the same sequence 
+of pseudo random numbers deterministically.
 
 #### Engine.handle(state, event)
 
 The handle function takes an input/output parameter **state** and an **event** to be applied to that state.
 It performs an **in-place** update of the state according to the nature of the **event**.
 
-For example, user input is modeled with events. I'll explain how to emit these events later. For now, 
-just worry about handling them in your engine. The Engine.handle(state, event) function might contain
+For example, user input is modeled with events. The Engine.handle(state, event) function might contain
 something like this:
 
 ```
-if(event.type == Events.GAME_EVENT){
-  switch(event.data.type){
-    case 'keyDown':
-      state.players[event.data.sessionId].yVelocity += 1;
-      break;
-    case 'keyUp':
-      state.players[event.data.sessionId].yVelocity -= 1;
-      break;
+MyEngine.handle = function(state, event){
+  if(event.type == Events.CUSTOM){
+    switch(event.data.which){
+      case 'keyDown':
+        state.players[event.data.sessionId].yVelocity += 1;
+        break;
+      case 'keyUp':
+        state.players[event.data.sessionId].yVelocity -= 1;
+        break;
+    }
   }
 }
 ```
 
-This function must be deterministic.
+This function must also be deterministic.
+
+It's important to note the event type when handling it. Standard event types can be found in `lib/shared/constants.js`.
+The CUSTOM type is used for all custom events.
 
 #### Engine.validate(state, event)
 
@@ -101,16 +111,15 @@ The validate function should throw an exception if **event** is invalid, given t
 for example, to prevent users from modifying each others positions by checking to see if
 **event.senderSessionId** (secure field set by the server) matches *event.data.playerId**.
 
-This function must be deterministic (careful that errors are thrown deterministically).
+This function must also be deterministic.
 
 ### Writing a Server
 
-You also need to implement a node.js application! Remember, tap.io is just a framework;
-it does not attempt to provide a node.js server application for you. This gives you more flexibility.
-I might at some point provide users with a default server implementation.
+tap.io does not provide an executable node.js application, only libraries for networking and graphics. It is up to API
+users to determine how to serve their game content (HTML, JS, CSS) to clients.
 
-You can find the server for the snake game in ```server/snake-engine.js```. It is essentially a node.js server 
-that hosts client files over http and invokes the tap.io framework. Here are the steps you will have to take:
+For an example of such an application, see the server for the snake game in ```server/snake-engine.js```. It is 
+essentially a node.js server that hosts client files over http and invokes the tap.io framework. Here are the steps taken (roughly):
 
 ```
 var server = require('http').createServer(function(){ // serve ordinary http requests here });
@@ -143,53 +152,40 @@ var game = new Game(socket);
 game.start();
 ```
 
-I will try to package this boilerplate stuff more nicely at some later date.
-
 ### Writing a Client
 
-Being browser based, clients require some JS/HTML in order to get the game to load. It's up to you to figure
-out how to serve this content to them. For the snake game I made the node.js application aware of
-the client files so that it could serve them over HTTP. I recommend this approach.
-
-The first thing you have to do is get the socket.io javascript. Usually, it is a script tag like this:
+Clients are browsers, and browsers need to see some HTML to get started. That means serving an HTML
+page with some javascript on it to bootstrap the game. The first thing the client needs is the socket.io javascript:
 
 ```
 <script type="text/javascript" src="http://your.socket.server/socket.io/socket.io.js"></script>
 ```
 
-The next thing you have to do is include every script under lib/shared *plus* any JS you have written
-that is required by your clients. That includes game engine JS.
-
-I know that's a lot of script tags.  One day, I plan to provide a single JS file containing all of the 
-tap.io scripts. For now, just include everything separately.
-
-After you've included the necessary scripts, you'll need to execute some JS to get the game running:
+The next thing is to include every script under lib/shared *plus* any custom client JS (this includes 
+the shared game engine object discussed earlier).  A few more lines will tie everything together:
 
 ```
-window.Engine.plugins.push(window.SnakeEngine); // <-- your engine implementation
+window.Engine.plugins.push(window.SnakeEngine); // <-- engine implementation
 
 var socket = window.io.connect(window.location.hostname),
     game = new window.Game(socket),
-    renderer = new window.SnakeRenderer(), // <-- your renderer implementation
+    renderer = new window.SnakeRenderer(), // <-- renderer implementation
     renderLoop = new window.RenderLoop(game, renderer);
 ```
 
-I'll explain the renderer in the next section.
-
-Now you will actually need to know how to emit events, e.g. in response to user input. It's really simple, 
-actually. Just use code like this:
+To send an event such as user input, make the following call:
 
 ```
-var eventData = {...};
-game.emit(Events.GAME_EVENT, eventData);
+game.send(Constants.Events.CUSTOM, { ...data... });
 ```
 
-When you process the event in your engine, eventData can be accessed under event.data.
+The second argument to that call, the event data, will be available in the Engine.handle call
+under event.data.
 
 #### Renderer
 
-To get the game to actually show up in the browser, you have to implement a renderer.  The interface is simple,
-it is an object with a render function.  Here is an example from the snake project:
+To get the game to actually show up in the browser, a renderer is required.  The interface is an 
+object with a render function.  Here is an example from the snake project:
 
 ```
 window.SnakeRenderer = (function(){
@@ -197,7 +193,7 @@ window.SnakeRenderer = (function(){
   var SnakeRenderer = function(){ };
 
   SnakeRenderer.prototype.render = function(playerSessionId, state){
-    // rendar!
+    // draw some canvas/webgl
   };
 
   return SnakeRenderer;
@@ -205,5 +201,4 @@ window.SnakeRenderer = (function(){
 })();
 ```
 
-The render() function takes the playerSessionId of the user you are rendering for (so that you can
-adjust the camera), and the game state.
+The render() function takes the playerSessionId of the user you are rendering for and the game state.

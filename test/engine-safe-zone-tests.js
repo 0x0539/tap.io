@@ -30,7 +30,7 @@ describe('Engine#calculateSafeZone', function(){
       vt: 10,
       sessionIds: [1, 3],
       events: [
-        {type: Events.CONNECTION_LOST, data: {sessionId: 3}, vt: 20}
+        {type: Events.END_SESSION, data: {sessionId: 3}, vt: 20}
       ]
     };
 
@@ -46,11 +46,11 @@ describe('Engine#calculateSafeZone', function(){
       vt: 10,
       sessionIds: [2, 4],
       events: [
-        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 12},
-        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 21},
-        {type: Events.GAME_EVENT, senderSessionId: 4, vt: 21},
-        {type: Events.GAME_EVENT, senderSessionId: 4, vt: 25},
-        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 30}
+        {type: Events.CUSTOM, senderSessionId: 2, vt: 12},
+        {type: Events.CUSTOM, senderSessionId: 2, vt: 21},
+        {type: Events.CUSTOM, senderSessionId: 4, vt: 21},
+        {type: Events.CUSTOM, senderSessionId: 4, vt: 25},
+        {type: Events.CUSTOM, senderSessionId: 2, vt: 30}
       ]
     };
 
@@ -67,8 +67,8 @@ describe('Engine#calculateSafeZone', function(){
       vt: 10,
       sessionIds: [2],
       events: [
-        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 21},
-        {type: Events.NEW_CONNECTION, data: {sessionId: 4}, vt: 22}
+        {type: Events.CUSTOM, senderSessionId: 2, vt: 21},
+        {type: Events.NEW_SESSION, data: {sessionId: 4}, vt: 22}
       ]
     };
 

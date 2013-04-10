@@ -91,7 +91,7 @@ describe('Engine#handle', function(){
   describe('on a startSession event', function(){
     it('should add the new session id to the sorted session id list', function(){
       var event = {
-            type: Events.NEW_CONNECTION, 
+            type: Events.NEW_SESSION, 
             data: {
               sessionId: 3
             }
@@ -109,7 +109,7 @@ describe('Engine#handle', function(){
   describe('on a endSession event', function(){
     it('should remove the session id from the sorted session id list', function(){
       var event = {
-            type: Events.CONNECTION_LOST,
+            type: Events.END_SESSION,
             data: {
               sessionId: 5 
             }

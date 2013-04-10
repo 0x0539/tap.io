@@ -65,16 +65,16 @@
         $('body').on('keyup', function(e){
           switch(e.which){
             case 38:
-              game.send(Events.GAME_EVENT, {type: 'keyNorth'});
+              game.send(Events.CUSTOM, {type: 'keyNorth'});
               break;
             case 40:
-              game.send(Events.GAME_EVENT, {type: 'keySouth'});
+              game.send(Events.CUSTOM, {type: 'keySouth'});
               break;
             case 37:
-              game.send(Events.GAME_EVENT, {type: 'keyWest'});
+              game.send(Events.CUSTOM, {type: 'keyWest'});
               break;
             case 39:
-              game.send(Events.GAME_EVENT, {type: 'keyEast'});
+              game.send(Events.CUSTOM, {type: 'keyEast'});
               break;
             case 81: // q
               if($('div.popup').is(':visible'))
@@ -83,7 +83,7 @@
                 $('div.popup').show();
               break;
             case 82: // r
-              game.send(Events.GAME_EVENT, {type: 'resurrect'});
+              game.send(Events.CUSTOM, {type: 'resurrect'});
               break;
             case 72: // h
               if($('.help').is(':visible'))
@@ -100,7 +100,7 @@
         $('.popup').on('change', '#nickname', function(){
           var nickname = $(this).val();
           if(nickname.trim().length)
-            game.send(Events.GAME_EVENT, {type: 'nameChange', newName: nickname});
+            game.send(Events.CUSTOM, {type: 'nameChange', newName: nickname});
         });
       });
     </script>

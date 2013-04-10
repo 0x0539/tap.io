@@ -28,7 +28,7 @@ describe('Engine#validate', function(){
       data: {
         sessionId: 1
       }, 
-      type: Events.NEW_CONNECTION, 
+      type: Events.NEW_SESSION, 
       vt: 2, 
       senderSessionId: 0
     }; 
@@ -121,7 +121,7 @@ describe('Engine#validate', function(){
     // builds a endSession event
     var buildEndSessionEvent = function(overrides){
       var returned = buildEvent({
-            type: Events.CONNECTION_LOST, 
+            type: Events.END_SESSION, 
             data: {
               sessionId: 1
             },
@@ -132,7 +132,7 @@ describe('Engine#validate', function(){
 
     it('should have a valid base', function(){
       var dis = this;
-      assert.equal(buildEndSessionEvent().type, Events.CONNECTION_LOST);
+      assert.equal(buildEndSessionEvent().type, Events.END_SESSION);
       assert.doesNotThrow(function(){
         dis.Engine.validate(buildState(), buildEndSessionEvent());
       });
@@ -164,7 +164,7 @@ describe('Engine#validate', function(){
     // builds a startSession event (overriding important fields in case base event type changes)
     var buildStartSessionEvent = function(overrides){
       var returned = buildEvent({
-            type: Events.NEW_CONNECTION, 
+            type: Events.NEW_SESSION, 
             data: {
               sessionId: 1
             },
@@ -175,7 +175,7 @@ describe('Engine#validate', function(){
 
     it('should have a valid base', function(){
       var dis = this;
-      assert.equal(buildStartSessionEvent().type, Events.NEW_CONNECTION);
+      assert.equal(buildStartSessionEvent().type, Events.NEW_SESSION);
       assert.doesNotThrow(function(){
         dis.Engine.validate(buildState(), buildStartSessionEvent());
       });

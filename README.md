@@ -13,7 +13,7 @@ Tap.io systems use socket.io for communication. They can use anything (WebGL, ca
 Running the Example
 ===================
 After cloning the repository, run ```sudo node example/snake/server/server.js```.  Then open up 
-http://localhost/snake.html in a couple different windows. If you prefer not to use port 80 (that's the
+http://localhost/snake.html in a couple different windows. To use a port other than 80 (the
 reason for sudo), then open up example/snake/server/server.js and change the port there.
 
 Working with tap.io
@@ -37,7 +37,7 @@ of the game. It defines an object called ```SnakeEngine``` that meets a specific
 })();
 ```
 
-**Note:** You may be confused by the ```(window || exports).``` idiom. It is used to write javascript that can run on 
+**Note:** The ```(window || exports)``` idiom is used to write javascript that can run on 
 both server AND client.  When it executes on a browser, ```window``` exists so ```window.SnakeEngine``` 
 gets defined. When it executes in node.js, ```window``` does not exist so ```exports.SnakeEngine``` gets 
 defined. Node.js developers will recognize that the exports object is the standard way to export functionality from a node module.
@@ -74,7 +74,7 @@ MyEngine.update = function(state){
 
 **Determinism!** It is crucial that the results of this function be deterministic. For tap.io purposes, deterministic 
 means that two different clients executing the update function with the same input state should arrive at the 
-same output state.  This does not mean it is impossible for your game to use pseudo-random numbers. An ARC4 RNG is 
+same output state.  This does not mean it is impossible for a game to use pseudo-random numbers. An ARC4 RNG is 
 included in tap.io whose state is folded into the overall game state, allowing clients to generate the same sequence 
 of pseudo random numbers deterministically.
 
@@ -133,7 +133,7 @@ global.window = false;
 var Network = require('../../../lib/server/network.js').Network,
     Game = require('../../../lib/server/game.js').Game,
     Engine = require('../../../lib/shared/engine.js').Engine,
-    SnakeEngine = require('../shared/snake-engine.js').SnakeEngine; // <-- your engine implementation!
+    SnakeEngine = require('../shared/snake-engine.js').SnakeEngine; // <-- engine implementation!
 
 // plug in game engine
 Engine.plugins.push(SnakeEngine);
@@ -202,4 +202,4 @@ window.SnakeRenderer = (function(){
 })();
 ```
 
-The render() function takes the playerSessionId of the user you are rendering for and the game state.
+The render() function takes the playerSessionId of the user whose perspective to render and the game state.

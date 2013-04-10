@@ -2,6 +2,9 @@ var assert = require('assert'),
     reload = require('./reload.js');
 
 describe('Engine#handle', function(){
+
+  var Events = require('../lib/shared/constants.js').Constants.Events;
+
   beforeEach(function(done){
     this.Engine = reload.reload('../lib/shared/engine.js').Engine;
     this.Engine.validate = function(){}; // stubbed
@@ -88,7 +91,7 @@ describe('Engine#handle', function(){
   describe('on a startSession event', function(){
     it('should add the new session id to the sorted session id list', function(){
       var event = {
-            type: 'startSession', 
+            type: Events.NEW_CONNECTION, 
             data: {
               sessionId: 3
             }
@@ -106,7 +109,7 @@ describe('Engine#handle', function(){
   describe('on a endSession event', function(){
     it('should remove the session id from the sorted session id list', function(){
       var event = {
-            type: 'endSession',
+            type: Events.CONNECTION_LOST,
             data: {
               sessionId: 5 
             }

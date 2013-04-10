@@ -59,21 +59,22 @@
         var socket = window.io.connect(window.location.hostname),
             game = new window.Game(socket),
             renderer = new window.SnakeRenderer(),
-            renderLoop = new window.RenderLoop(game, renderer);
+            renderLoop = new window.RenderLoop(game, renderer),
+            Events = window.Constants.Events;
 
         $('body').on('keyup', function(e){
           switch(e.which){
             case 38:
-              game.sendGameEvent({type: 'keyNorth'});
+              game.send(Events.GAME_EVENT, {type: 'keyNorth'});
               break;
             case 40:
-              game.sendGameEvent({type: 'keySouth'});
+              game.send(Events.GAME_EVENT, {type: 'keySouth'});
               break;
             case 37:
-              game.sendGameEvent({type: 'keyWest'});
+              game.send(Events.GAME_EVENT, {type: 'keyWest'});
               break;
             case 39:
-              game.sendGameEvent({type: 'keyEast'});
+              game.send(Events.GAME_EVENT, {type: 'keyEast'});
               break;
             case 81: // q
               if($('div.popup').is(':visible'))
@@ -82,7 +83,7 @@
                 $('div.popup').show();
               break;
             case 82: // r
-              game.sendGameEvent({type: 'resurrect'});
+              game.send(Events.GAME_EVENT, {type: 'resurrect'});
               break;
             case 72: // h
               if($('.help').is(':visible'))
@@ -99,7 +100,7 @@
         $('.popup').on('change', '#nickname', function(){
           var nickname = $(this).val();
           if(nickname.trim().length)
-            game.sendGameEvent({type: 'nameChange', newName: 'nickname'});
+            game.send(Events.GAME_EVENT, {type: 'nameChange', newName: nickname});
         });
       });
     </script>

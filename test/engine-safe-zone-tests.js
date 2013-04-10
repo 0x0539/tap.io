@@ -2,6 +2,9 @@ var assert = require('assert'),
     reload = require('./reload.js');
 
 describe('Engine#calculateSafeZone', function(){
+
+  var Events = require('../lib/shared/constants.js').Constants.Events;
+
   beforeEach(function(done){
     this.Engine = reload.reload('../lib/shared/engine.js').Engine;
     done();
@@ -27,7 +30,7 @@ describe('Engine#calculateSafeZone', function(){
       vt: 10,
       sessionIds: [1, 3],
       events: [
-        {type: 'endSession', data: {sessionId: 3}, vt: 20}
+        {type: Events.CONNECTION_LOST, data: {sessionId: 3}, vt: 20}
       ]
     };
 
@@ -43,11 +46,11 @@ describe('Engine#calculateSafeZone', function(){
       vt: 10,
       sessionIds: [2, 4],
       events: [
-        {type: 'gameevent', senderSessionId: 2, vt: 12},
-        {type: 'gameevent', senderSessionId: 2, vt: 21},
-        {type: 'gameevent', senderSessionId: 4, vt: 21},
-        {type: 'gameevent', senderSessionId: 4, vt: 25},
-        {type: 'gameevent', senderSessionId: 2, vt: 30}
+        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 12},
+        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 21},
+        {type: Events.GAME_EVENT, senderSessionId: 4, vt: 21},
+        {type: Events.GAME_EVENT, senderSessionId: 4, vt: 25},
+        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 30}
       ]
     };
 
@@ -64,8 +67,8 @@ describe('Engine#calculateSafeZone', function(){
       vt: 10,
       sessionIds: [2],
       events: [
-        {type: 'gameevent', senderSessionId: 2, vt: 21},
-        {type: 'startSession', data: {sessionId: 4}, vt: 22}
+        {type: Events.GAME_EVENT, senderSessionId: 2, vt: 21},
+        {type: Events.NEW_CONNECTION, data: {sessionId: 4}, vt: 22}
       ]
     };
 

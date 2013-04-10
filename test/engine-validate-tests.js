@@ -10,6 +10,8 @@ var merge = function(hash1, hash2){
 
 describe('Engine#validate', function(){
 
+  var Events = require('../lib/shared/constants.js').Constants.Events;
+
   beforeEach(function(done){
     this.Engine = reload.reload('../lib/shared/engine.js').Engine;
     done();
@@ -26,7 +28,7 @@ describe('Engine#validate', function(){
       data: {
         sessionId: 1
       }, 
-      type: 'startSession', 
+      type: Events.NEW_CONNECTION, 
       vt: 2, 
       senderSessionId: 0
     }; 
@@ -119,7 +121,7 @@ describe('Engine#validate', function(){
     // builds a endSession event
     var buildEndSessionEvent = function(overrides){
       var returned = buildEvent({
-            type: 'endSession', 
+            type: Events.CONNECTION_LOST, 
             data: {
               sessionId: 1
             },
@@ -130,7 +132,7 @@ describe('Engine#validate', function(){
 
     it('should have a valid base', function(){
       var dis = this;
-      assert.equal(buildEndSessionEvent().type, 'endSession');
+      assert.equal(buildEndSessionEvent().type, Events.CONNECTION_LOST);
       assert.doesNotThrow(function(){
         dis.Engine.validate(buildState(), buildEndSessionEvent());
       });
@@ -162,7 +164,7 @@ describe('Engine#validate', function(){
     // builds a startSession event (overriding important fields in case base event type changes)
     var buildStartSessionEvent = function(overrides){
       var returned = buildEvent({
-            type: 'startSession', 
+            type: Events.NEW_CONNECTION, 
             data: {
               sessionId: 1
             },
@@ -173,7 +175,7 @@ describe('Engine#validate', function(){
 
     it('should have a valid base', function(){
       var dis = this;
-      assert.equal(buildStartSessionEvent().type, 'startSession');
+      assert.equal(buildStartSessionEvent().type, Events.NEW_CONNECTION);
       assert.doesNotThrow(function(){
         dis.Engine.validate(buildState(), buildStartSessionEvent());
       });
@@ -203,7 +205,7 @@ describe('Engine#validate', function(){
 
   describe('heartbeat events', function(){
     var buildHeartbeatEvent = function(overrides){
-      var returned = buildEvent({type: 'heartbeat'});
+      var returned = buildEvent({type: Events.EMPTY});
       return merge(returned, overrides);
     };
     it('should have a valid base', function(){

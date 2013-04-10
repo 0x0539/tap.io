@@ -7,8 +7,9 @@
 (window || exports).SnakeEngine = (function(){
 
   var FREED = (window || require('../../../lib/shared/freed/freed.js')).FREED,
-      Utilities = (window || require('../../../lib/shared/utilities.js')).Utilities;
-      Random = (window || require('../../../lib/shared/random.js')).Random;
+      Utilities = (window || require('../../../lib/shared/utilities.js')).Utilities,
+      Random = (window || require('../../../lib/shared/random.js')).Random,
+      Events = (window || require('../../../lib/shared/constants.js')).Constants.Events;
 
   var randall = new Random();
 
@@ -276,14 +277,14 @@
 
   SnakeEngine.handle = function(state, event){
     switch(event.type){
-      case 'startSession':
+      case Events.NEW_CONNECTION:
         state.players = state.players || {};
         state.players[event.data.sessionId] = this.buildNewPlayer(state);
         break;
-      case 'endSession':
+      case Events.LOST_CONNECTION:
         delete state.players[event.data.sessionId];
         break;
-      case 'gameevent':
+      case Events.GAME_EVENT:
         var player = state.players[event.senderSessionId],
             head = player.segments[0];
 

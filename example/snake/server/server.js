@@ -5,6 +5,7 @@ var HTTP = require('http'),
 
 var Parameters = {
   scripts: [
+    '/lib/shared/constants.js',
     '/lib/shared/parameters.js',
     '/lib/shared/utilities.js',
     '/lib/shared/serializer.js',

@@ -81,7 +81,7 @@ just worry about handling them in your engine. The Engine.handle(state, event) f
 something like this:
 
 ```
-if(event.type == 'gameevent'){
+if(event.type == Events.GAME_EVENT){
   switch(event.data.type){
     case 'keyDown':
       state.players[event.data.sessionId].yVelocity += 1;
@@ -181,7 +181,7 @@ actually. Just use code like this:
 
 ```
 var eventData = {...};
-game.emit('gameevent', eventData);
+game.emit(Events.GAME_EVENT, eventData);
 ```
 
 When you process the event in your engine, eventData can be accessed under event.data.

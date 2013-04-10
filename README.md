@@ -12,8 +12,9 @@ Tap.io systems use socket.io for communication. They can use anything (WebGL, ca
 
 Running the Example
 ===================
-After cloning the repository, you should run ```node example/snake/server/server.js```.  Now you should be 
-able to hit http://localhost:7787/snake.html in a couple different windows and see what happens.
+After cloning the repository, run ```sudo node example/snake/server/server.js```.  Then open up 
+http://localhost/snake.html in a couple different windows. If you prefer not to use port 80 (that's the
+reason for sudo), then open up example/snake/server/server.js and change the port there.
 
 Working with tap.io
 ===================

@@ -7,6 +7,14 @@ describe('Serializer', function(){
     done();
   });
 
+  it('should be able to restore prototype information', function(){
+    var Face3 = require('../lib/shared/freed/face3.js').Face3;
+    var face1 = new Face3();
+    var serialized = this.Serializer.serialize(face1);
+    var face2 = this.Serializer.deserialize(serialized);
+    assert.equal('function', typeof face2.vertices)
+  });
+
   it('should be able to serialize and deserialize deeply nested objects', function(){
     var object = {
       q: [

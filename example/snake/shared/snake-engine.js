@@ -53,9 +53,9 @@
           faces = this.faceBucket.get(x, y);
       for(var f = 0; f < faces.length; f++){
         var face = faces[f];
-        if(triangleContains(FREED.Face3.vertices(face, terrain), x, y)){
-          var plane = FREED.Face3.plane(face, terrain),
-              sphereZ = FREED.Plane.solveZ(plane, x, y) + d;
+        if(triangleContains(face.vertices(terrain), x, y)){
+          var plane = face.plane(terrain),
+              sphereZ = plane.solveZ(x, y) + d;
           maxZ = maxZ == null || sphereZ > maxZ ? sphereZ : maxZ;
         }
       }
@@ -87,12 +87,12 @@
     player.segments = [];
 
     for(var i = 0; i < 3; i++){
-      var center = FREED.Vector3(
+      var center = new FREED.Vector3(
             cX + this.gap * i * dx, 
             cY + this.gap * i * dy, 
             0
           ),
-          sphere = FREED.Sphere(center, this.radius);
+          sphere = new FREED.Sphere(center, this.radius);
 
       player.segments.push({
         sphere: sphere, 
@@ -141,7 +141,7 @@
     if(this.faceBucket == null)
       this.faceBucket = new FREED.FaceBucket(20, 20, state.terrain);
     if(this.xyPlane == null)
-      this.xyPlane = FREED.Plane(FREED.Vector3(0, 0, 1), FREED.Vector3(0, 0, 0));
+      this.xyPlane = new FREED.Plane(new FREED.Vector3(0, 0, 1), new FREED.Vector3(0, 0, 0));
 
     // initialize
     state.food = state.food || [];
@@ -151,8 +151,8 @@
       var x = Math.floor(randall.random() * (this.faceBucket.r - this.faceBucket.l)),
           y = Math.floor(randall.random() * (this.faceBucket.t - this.faceBucket.b)),
           z = 40,
-          center = FREED.Vector3(x, y, z),
-          sphere = FREED.Sphere(center, this.foodRadius);
+          center = new FREED.Vector3(x, y, z),
+          sphere = new FREED.Sphere(center, this.foodRadius);
       this.floatSphere(state.terrain, sphere);
       state.food.push(sphere);
     }
@@ -180,21 +180,21 @@
             path = segment.path;
 
         // remove from path if already there
-        while(path.length && FREED.Vector3.equals(center, path[0]))
+        while(path.length && center.equals(path[0]))
           path.shift();
 
         // eat food
         for(var f = 0; f < state.food.length; f++){
-          if(FREED.Sphere.overlaps(state.food[f], segment.sphere)){
+          if(state.food[f].overlaps(segment.sphere)){
             state.food = Utilities.spliceIndex(state.food, f);
             var lastSegment = player.segments[player.segments.length - 1],
-                newSphere = FREED.Sphere.copy(lastSegment.sphere),
-                newPath = [FREED.Vector3.copy(lastSegment.sphere.center)];
+                newSphere = lastSegment.sphere.copy(),
+                newPath = [lastSegment.sphere.center.copy()];
 
             for(var p = 0; p < lastSegment.path.length; p++)
-              newPath.push(FREED.Vector3.copy(lastSegment.path[p]));
+              newPath.push(lastSegment.path[p].copy());
 
-            FREED.Vector3.subSelf(newSphere.center, FREED.Vector3(0, this.gap, 0));
+            new FREED.Vector3(0, this.gap, 0).subFrom(newSphere.center);
 
             player.segments.push({
               sphere: newSphere,
@@ -206,12 +206,12 @@
         // if we still have a destination, move to it
         if(path.length){
           var next = path[0],
-              delta = FREED.Vector3.sub(next, center);
+              delta = next.minus(center);
 
           delta.x = Math.max(-this.speed, Math.min(this.speed, delta.x));
           delta.y = Math.max(-this.speed, Math.min(this.speed, delta.y));
 
-          FREED.Vector3.addSelf(center, delta);
+          delta.addTo(center);
         }
 
         // otherwise, just go in the player direction
@@ -247,7 +247,7 @@
             continue;
           for(var j = 0; j < otherPlayer.segments.length; j++){
             var otherSegment = otherPlayer.segments[j];
-            if(FREED.Sphere.overlaps(segment.sphere, otherSegment.sphere)){
+            if(segment.sphere.overlaps(otherSegment.sphere)){
               if(i == 0) killList[sessionId] = otherSessionId;
               if(j == 0) killList[otherSessionId] = sessionId;
             }
@@ -324,7 +324,7 @@
           case 'keyNorth':
             // save head location in segment paths
             for(var i = 1; i < player.segments.length; i++)
-              player.segments[i].path.push(FREED.Vector3.copy(head.sphere.center));
+              player.segments[i].path.push(head.sphere.center.copy());
             break;
         }
 

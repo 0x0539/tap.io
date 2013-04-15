@@ -139,14 +139,14 @@ socket.start();
 // start the game manager
 var game = new Game(socket);
 
-game.state.terrain = new FREED.Geometry();
+game.state.terrain = FREED.Geometry();
 
 var cols = 30, rows = 30, scale = 30;
 for(var i = 0; i < cols; i++){
   for(var j = 0; j < rows; j++){
     var z1 = scale*Math.sin(Math.sqrt(i*i + j*j)),
         z2 = 2*scale*Math.sin(Math.sqrt((rows-i)*(rows-i) + j*j));
-    game.state.terrain.vertices.push(new FREED.Vector3(i*scale, j*scale, z1 + z2));
+    game.state.terrain.vertices.push(FREED.Vector3(i*scale, j*scale, z1 + z2));
   }
 }
 
@@ -158,8 +158,8 @@ game.state.terrain.maxY = (rows-1)*scale;
 for(var i = 0; i < cols - 1; i++){
   for(var j = 0; j < rows - 1; j++){
     var v = i*rows + j,
-        f1 = new FREED.Face3(v, v+rows+1, v+1, game.state.terrain),
-        f2 = new FREED.Face3(v, v+rows, v+rows+1, game.state.terrain);
+        f1 = FREED.Face3(v, v+rows+1, v+1, game.state.terrain),
+        f2 = FREED.Face3(v, v+rows, v+rows+1, game.state.terrain);
     game.state.terrain.faces.push(f1);
     game.state.terrain.faces.push(f2);
   }

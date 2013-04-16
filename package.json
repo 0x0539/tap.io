@@ -1,10 +1,20 @@
 {
   "name": "tap.io",
+  "version": "0.0.0-6",
+  "main": "tap",
+  "description": "A Node.js platform for building distributed real-time systems with client browsers.",
+  "author": {
+    "name": "Sebastian Goodman"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/0x0539/tap.io"
+  },
   "subdomain": "bumbleskunk.tap.io",
   "scripts": {
     "start": "example/snake/server/server.js"
   },
-  "version": "0.0.0-6",
   "engines": {
     "node": "0.8.x"
   },

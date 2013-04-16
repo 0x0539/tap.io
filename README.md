@@ -5,4 +5,4 @@ explosion of innovation in browser technology, including WebSockets, WebGL, and 
 
 Tap.io systems use socket.io for communication. They can use anything (WebGL, canvas, jQuery) to render the game.
 
-See the rest of [the documentation](http://github.com/0x0539/tap.io/src).
+See the rest of [the documentation](/src).

@@ -102,7 +102,7 @@ Network.prototype.onConnection = function(socket){
   var sessionId = this.getNextSessionId();
 
   // creates a new session and saves it
-  this.sessions[sessionId] = new this.Session(this, socket, sessionId);
+  this.sessions[sessionId] = new Session(this, socket, sessionId);
 
   // start the new session
   this.sessions[sessionId].start();

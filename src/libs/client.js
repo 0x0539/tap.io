@@ -11,19 +11,19 @@ var Game = function(socket){
 };
 Game.prototype.onReceive = function(frame){
   switch(frame.type){
-    case tap.Events.BOOTSTRAP:
-      var data = tap.Serializer.deserialize(frame.data);
+    case tapio.Events.BOOTSTRAP:
+      var data = tapio.Serializer.deserialize(frame.data);
       this.state = data.state;
       this.sessionId = data.sessionId;
       this.start();
       break;
-    case tap.Events.PING:
-      this.send(tap.Events.PONG, frame.data);
+    case tapio.Events.PING:
+      this.send(tapio.Events.PONG, frame.data);
       break;
-    case tap.Events.NEW_SESSION:
-    case tap.Events.END_SESSION:
-    case tap.Events.CUSTOM:
-    case tap.Events.EMPTY:
+    case tapio.Events.NEW_SESSION:
+    case tapio.Events.END_SESSION:
+    case tapio.Events.CUSTOM:
+    case tapio.Events.EMPTY:
       this.addEvent(frame);
       break;
     default:
@@ -43,10 +43,10 @@ Game.prototype.addEvent = function(event){
 
       // sync clocks, set nextIteration to happen in the future by 1 vt period
       this.projectedState.clock = this.state.clock = event.vt;
-      this.nextIteration = Date.now() + tap.Parameters.vtPeriodInMillis;
+      this.nextIteration = Date.now() + tapio.Parameters.vtPeriodInMillis;
     }
     else{
-      var msGap = tap.Utilities.ticks2ms(this.projectedState.vt - event.vt);
+      var msGap = tapio.Utilities.ticks2ms(this.projectedState.vt - event.vt);
       console.log("projected=" + this.projectedState.vt + ', event=' + event.vt + ', missed by ' + msGap + 'ms');
       this.projectedState = null; // invalidate projected state, event in the past was received
     }
@@ -75,16 +75,16 @@ Game.prototype.start = function(){
   // send client heartbeat
   this.heartbeatInterval = setInterval(function(){
     if(dis.idle)
-      dis.send(tap.Events.EMPTY);
+      dis.send(tapio.Events.EMPTY);
     dis.idle = true;
   }, 10000);
 
   this.gameLoopInterval = setInterval(function(){
     dis.loop();
-  }, tap.Parameters.vtPeriodInMillis);
+  }, tapio.Parameters.vtPeriodInMillis);
 
   this.gameCompactInterval = setInterval(function(){
-    tap.Engine.safelyAdvance(dis.state);
+    tapio.Engine.safelyAdvance(dis.state);
   }, 1000);
 };
 Game.prototype.loop = function(){
@@ -96,20 +96,20 @@ Game.prototype.loop = function(){
 
   // reset projected state to safe state if invalidating event was received
   if(this.projectedState == null)
-    this.projectedState = tap.Cloner.clone(this.state);
+    this.projectedState = tapio.Cloner.clone(this.state);
 
   // update clocks for every iteration we missed
-  for(var now = Date.now(); now > this.nextIteration; this.nextIteration += tap.Parameters.vtPeriodInMillis){
+  for(var now = Date.now(); now > this.nextIteration; this.nextIteration += tapio.Parameters.vtPeriodInMillis){
     this.state.clock++;
     this.projectedState.clock++;
   }
 
   // we should try our best to update the projected state in real-time, since it gets rendered
-  tap.Engine.advanceTo(this.projectedState, this.projectedState.clock);
+  tapio.Engine.advanceTo(this.projectedState, this.projectedState.clock);
 };
 // Insert the specified event into the distributed timeline. The data field is optional.
 Game.prototype.send = function(type, data){
-  if(type == tap.Events.CUSTOM)
+  if(type == tapio.Events.CUSTOM)
     this.idle = false;
   this.socket.emit('tap.io', {type: type, data: data});
 };

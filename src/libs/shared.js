@@ -1,6 +1,6 @@
 var Cloner = function(){};
 Cloner.prototype.clone = function(object){
-  return Serializer.deserialize(Serializer.serialize(object));
+  return exports.Serializer.deserialize(exports.Serializer.serialize(object));
 };
 
 var Events = function(){

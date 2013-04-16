@@ -38,7 +38,7 @@ var JsResource = function(name, resource){
   this.name = name;
   this.resource = resource;
   this.prefix = 'window.tap = window.tap || {};\n(function(exports){\n';
-  this.suffix = '\n})(window.tap);';
+  this.suffix = '\n})(window.tapio);';
 };
 JsResource.prototype.getContent = function(req){
   return this.prefix + this.resource.getContent(req) + this.suffix;
@@ -61,7 +61,7 @@ EjsResource.prototype.getContent = function(req){
   for (var key in url.query) {
     ejsScope[key] = url.query[key];
   }
-  return ejs.render(this.resource.getContent(req), ejsScope);
+  return ejs.render(this.resource.getContent(req).toString(), ejsScope);
 };
 EjsResource.prototype.getContentType = function(req){
   return this.resource.getContentType(req);
@@ -70,7 +70,7 @@ EjsResource.prototype.getContentType = function(req){
 var App = function(){
   this.resourcesByName = {};
   this.resourcesInOrder = [];
-  this.addResource(new FileResource('/tap/client.js', __dirname + '/client.js'));
+  this.addResource(new JsResource('/tap/client.js', new FileResource('', __dirname + '/client.js')));
 };
 App.prototype.getResource = function(name){
   return this.resourcesByName[name];

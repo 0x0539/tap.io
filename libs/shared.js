@@ -188,7 +188,7 @@ Random.prototype.arc4random = function(){
   }
   return (n + x) / d;
 };
-var arc4g = function(count){
+Random.prototype.arc4g = function(count){
   var s = this.S,
       i = this.lowbits(this.i + 1),
       t = s[i],
@@ -233,8 +233,8 @@ Random.prototype.mixkey = function(seed, key){
   seed += '';                         // Ensure the seed is a string
   var smear = 0;
   for (var j = 0; j < seed.length; j++) {
-    key[lowbits(j)] =
-      lowbits((smear ^= key[lowbits(j)] * 19) + seed.charCodeAt(j));
+    key[this.lowbits(j)] =
+      this.lowbits((smear ^= key[this.lowbits(j)] * 19) + seed.charCodeAt(j));
   }
   seed = '';
   for (j in key) { seed += String.fromCharCode(key[j]); }

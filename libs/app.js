@@ -70,6 +70,7 @@ EjsResource.prototype.getContentType = function(req){
 var App = function(){
   this.resourcesByName = {};
   this.resourcesInOrder = [];
+  this.addResource(new JsResource('/tap/shared.js', new FileResource('', __dirname + '/shared.js')));
   this.addResource(new JsResource('/tap/client.js', new FileResource('', __dirname + '/client.js')));
 };
 App.prototype.getResource = function(name){

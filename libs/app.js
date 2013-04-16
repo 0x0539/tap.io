@@ -37,8 +37,8 @@ DynamicResource.prototype.getContentType = function(req){
 var JsResource = function(name, resource){
   this.name = name;
   this.resource = resource;
-  this.prefix = 'window.tap = window.tap || {};\n(function(exports){\n';
-  this.suffix = '\n})(window.tapio);';
+  this.prefix = 'window.tapio = window.tapio || {};\n(function(exports){\n\n';
+  this.suffix = '\n\n})(window.tapio);';
 };
 JsResource.prototype.getContent = function(req){
   return this.prefix + this.resource.getContent(req) + this.suffix;

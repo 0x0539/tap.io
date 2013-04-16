@@ -2,7 +2,7 @@
   "name": "tap.io",
   "version": "0.0.0-14",
   "main": "tap",
-  "description": "A Node.js platform for building distributed real-time systems with client browsers.",
+  "description": "A Node.js platform for building distributed real-time systems with browser-based clients.",
   "author": {
     "name": "Sebastian Goodman"
   },

@@ -13,7 +13,7 @@
   },
   "subdomain": "bumbleskunk.tap.io",
   "scripts": {
-    "start": "example/snake/server/server.js"
+    "start": "example/minimal/app.js"
   },
   "engines": {
     "node": "0.8.x"

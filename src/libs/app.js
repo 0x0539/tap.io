@@ -121,8 +121,20 @@ App.prototype.handle = function(req, res){
 };
 
 exports.App = App;
-exports.Random = shared.Random;
 exports.FileResource = FileResource;
 exports.DynamicResource = DynamicResource;
 exports.JsResource = JsResource;
 exports.EjsResource = EjsResource;
+
+var merge = function(into, from){
+  for (var declaration in from) {
+    if (declaration in into) {
+      throw new Error('already declared: ' + declaration);
+    } else {
+      into[declaration] = from[declaration];
+    }
+  }
+};
+
+merge(exports, shared);
+merge(exports, server);

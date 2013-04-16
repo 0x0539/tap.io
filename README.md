@@ -1,15 +1,15 @@
-News
-====
-04-2013: The game is still up, but it is using an older version of the engine.
-
-10-2012: The example game is live. Head on over to http://bumbleskunk.tap.io.jit.su/ 
-
 Browser-based Multiplayer Games with tap.io
 ===========================================
 Platform for building browser-based, distributed simulations/games. This is all possible thanks to the recent 
 explosion of innovation in browser technology, including WebSockets, WebGL, and socket.io.
 
 Tap.io systems use socket.io for communication. They can use anything (WebGL, canvas, jQuery) to render the game.
+
+News
+====
+04-2013: The game is still up, but it is using an older version of the engine.
+
+10-2012: The example game is live. Head on over to http://bumbleskunk.tap.io.jit.su/ 
 
 Installing
 ==========

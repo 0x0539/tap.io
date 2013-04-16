@@ -57,7 +57,7 @@ EjsResource.prototype.getContent = function(req){
   for (var key in this.ejsScope) {
     ejsScope[key] = this.ejsScope[key];
   }
-  var url = require('url').parse(req, true, true);
+  var url = require('url').parse(req.url, true, true);
   for (var key in url.query) {
     ejsScope[key] = url.query[key];
   }

@@ -1,6 +1,6 @@
 News
 ====
-04-2013: The game is still up, but it is using an older version of the engine which is not backwards compatible. The game will be ported to the new API soon.
+04-2013: The game is still up, but it is using an older version of the engine.
 
 10-2012: The example game is live. Head on over to http://bumbleskunk.tap.io.jit.su/ 
 

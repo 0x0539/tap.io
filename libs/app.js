@@ -94,7 +94,8 @@ App.prototype.start = function(port, state, engine){
 
   httpServer.listen(port);
 
-  shared.Engine.plugins = [engine];
+  if (engine != null)
+    shared.Engine.plugins = [engine];
 
   var network = new server.Network(httpServer);
   network.start();
@@ -119,6 +120,7 @@ App.prototype.handle = function(req, res){
 };
 
 exports.App = App;
+exports.Random = shared.Random;
 exports.FileResource = FileResource;
 exports.DynamicResource = DynamicResource;
 exports.JsResource = JsResource;

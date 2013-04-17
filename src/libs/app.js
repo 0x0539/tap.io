@@ -3,21 +3,19 @@ var ejs = require('ejs');
 var server = require('./server.js');
 var shared = require('./shared.js');
 
-var FileResource = function(name, path, contentType){
-  this.name = name;
+var FileResource = function(path, contentType){
   this.path = path;
+  this.contentType = contentType;
   this.contents = fs.readFileSync(path);
-  this.contentType = contentType || 'text/plain';
 };
 FileResource.prototype.getContent = function(req){
   return this.contents;
 };
 FileResource.prototype.getContentType = function(req){
-  return this.contentType;
+  return this.contentType || 'text/plain';
 };
 
-var DynamicResource = function(name, getContentCb, getContentTypeCb){
-  this.name = name;
+var DynamicResource = function(getContentCb, getContentTypeCb){
   this.getContentCb = getContentCb;
   this.getContentTypeCb = getContentTypeCb;
 };
@@ -34,21 +32,19 @@ DynamicResource.prototype.getContentType = function(req){
   throw new Error('illegal content type callback for ' + this.name);
 };
 
-var JsResource = function(name, resource){
-  this.name = name;
+var JsResource = function(resource){
   this.resource = resource;
-  this.prefix = 'window.tapio = window.tapio || {};\n(function(exports){\n\n';
-  this.suffix = '\n\n})(window.tapio);';
+  this.template = new EjsResource(new FileResource(__dirname + '/wrapper.js.ejs'));
 };
 JsResource.prototype.getContent = function(req){
-  return this.prefix + this.resource.getContent(req) + this.suffix;
+  this.template.ejsScope.script = this.resource.getContent(req);
+  return this.template.getContent(req);
 };
 JsResource.prototype.getContentType = function(req){
   return 'text/javascript';
 };
 
-var EjsResource = function(name, resource, ejsScope){
-  this.name = name;
+var EjsResource = function(resource, ejsScope){
   this.resource = resource;
   this.ejsScope = ejsScope || {};
 };
@@ -70,23 +66,25 @@ EjsResource.prototype.getContentType = function(req){
 var App = function(){
   this.resourcesByName = {};
   this.resourcesInOrder = [];
-  this.addResource(new JsResource('/tap/shared.js', new FileResource('', __dirname + '/shared.js')));
-  this.addResource(new JsResource('/tap/client.js', new FileResource('', __dirname + '/client.js')));
+  this.addResource('/tap/shared.js', new JsResource(new FileResource(__dirname + '/shared.js')));
+  this.addResource('/tap/client.js', new JsResource(new FileResource(__dirname + '/client.js')));
 };
 App.prototype.getResource = function(name){
   return this.resourcesByName[name];
 };
-App.prototype.addResource = function(resource){
-  if (resource.name == null)
+App.prototype.addResource = function(name, resource){
+  if (name == null)
     throw new Error('resource name missing');
-  this.resourcesByName[resource.name] = resource;
+  if (name in this.resourcesByName)
+    throw new Error('resource name already taken');
+  this.resourcesByName[name] = resource;
   this.resourcesInOrder.push(resource);
 };
 App.prototype.forAllResources = function(callback){
   for (var i = 0; i < this.resourcesInOrder.length; i++)
     callback(this.resourcesInOrder[i]);
 };
-App.prototype.start = function(port, state, engine){
+App.prototype.start = function(port, state, extension){
   var dis = this;
 
   var httpServer = require('http').createServer(function(req, res){
@@ -95,8 +93,8 @@ App.prototype.start = function(port, state, engine){
 
   httpServer.listen(port);
 
-  if (engine != null)
-    shared.Engine.plugins = [engine];
+  if(extension)
+    shared.Engine.setExtension(extension);
 
   var network = new server.Network(httpServer);
   network.start();

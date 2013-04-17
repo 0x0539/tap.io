@@ -19,7 +19,10 @@ var Events = function(){
 };
 
 var Engine = function(){
-  this.plugins = [];
+  this.extension = null;
+};
+Engine.prototype.setExtension = function(extension){
+  this.extension = extension;
 };
 Engine.prototype.calculateSafeZone = function(state){
   var safeZone = {};
@@ -70,8 +73,8 @@ Engine.prototype.advanceTo = function(state, endVt){
   for(; state.vt < endVt; state.vt++){
 
     // handle physics at current vt
-    for(var i = 0; i < this.plugins.length; i++)
-      this.plugins[i].update(state);
+    if(this.extension)
+      this.extension.update(state);
 
     // handle events at current vt
     while(state.events.length > 0 && state.events[0].vt == state.vt)
@@ -95,8 +98,8 @@ Engine.prototype.handle = function(state, event){
       break;
   }
 
-  for(var i = 0; i < this.plugins.length; i++)
-    this.plugins[i].handle(state, event);
+  if(this.extension)
+    this.extension.handle(state, event);
 };
 Engine.prototype.validate = function(state, event){
   if(event.vt == null)
@@ -125,8 +128,8 @@ Engine.prototype.validate = function(state, event){
     default:
       throw new Error('invalid event type');
   }
-  for(var i = 0; i < this.plugins.length; i++)
-    this.plugins[i].validate(state, event);
+  if(this.extension)
+    this.extension.validate(state, event);
 };
 
 var Parameters = function(){
@@ -172,7 +175,7 @@ var Random = function(seed){
 
   exports.Serializer.registerInstance(this, Random);
 };
-Random.prototype.arc4random = function(){
+Random.prototype.random = function(){
   var n = this.arc4g(this.chunks);
   var d = this.startdenom;
   var x = 0;

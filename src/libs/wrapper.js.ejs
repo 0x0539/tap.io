@@ -1,0 +1,19 @@
+(function(){
+  window.tapio = window.tapio || {};
+
+  var tapio_exports = {};
+
+  (function(exports){
+
+<%- locals.script %>
+
+  })(tapio_exports);
+
+  for (var k in tapio_exports) {
+    if (k in window.tapio) {
+      throw new Error(k + ' already declared in namespace');
+    } else {
+      window.tapio[k] = tapio_exports[k];
+    }
+  }
+})();

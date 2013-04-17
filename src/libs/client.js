@@ -6,6 +6,7 @@ var Game = function(socket){
 
   this.socket = socket;
   this.socket.on('tap.io', function(frame){
+    frame = tapio.Serializer.deserialize(frame);
     dis.onReceive(frame);
   });
 };
@@ -18,7 +19,7 @@ Game.prototype.onReceive = function(frame){
       this.start();
       break;
     case tapio.Events.PING:
-      this.send(tapio.Events.PONG, frame.data);
+      this.send({type: tapio.Events.PONG, data: frame.data});
       break;
     case tapio.Events.NEW_SESSION:
     case tapio.Events.END_SESSION:
@@ -72,10 +73,9 @@ Game.prototype.start = function(){
 
   this.nextIteration = Date.now();
 
-  // send client heartbeat
   this.heartbeatInterval = setInterval(function(){
     if(dis.idle)
-      dis.send(tapio.Events.EMPTY);
+      dis.send({type: tapio.Events.EMPTY});
     dis.idle = true;
   }, 10000);
 
@@ -107,11 +107,12 @@ Game.prototype.loop = function(){
   // we should try our best to update the projected state in real-time, since it gets rendered
   tapio.Engine.advanceTo(this.projectedState, this.projectedState.clock);
 };
-// Insert the specified event into the distributed timeline. The data field is optional.
-Game.prototype.send = function(type, data){
-  if(type == tapio.Events.CUSTOM)
+Game.prototype.send = function(frame){
+  if(frame.type == null)
+    throw new Error('frame type is required');
+  if(frame.type == tapio.Events.CUSTOM)
     this.idle = false;
-  this.socket.emit('tap.io', {type: type, data: data});
+  this.socket.emit('tap.io', tapio.Serializer.serialize(frame));
 };
 
 var rAF = (function(){

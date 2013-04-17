@@ -16,6 +16,7 @@ var Session = function(network, socket, sessionId) {
   this.rttEstimate = 0;
 
   this.socket.on('tap.io', function(frame) {
+    frame = shared.Serializer.deserialize(frame);
     // handle the pong event specially
     if(frame.type == shared.Events.PONG)
       dis.onPong(frame);
@@ -46,7 +47,7 @@ Session.prototype.getLatency = function() {
   return this.rttEstimate / 2.0;
 };
 Session.prototype.send = function(frame){ 
-  this.socket.emit('tap.io', frame);
+  this.socket.emit('tap.io', shared.Serializer.serialize(frame));
 };
 
 /**

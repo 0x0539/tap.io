@@ -202,10 +202,7 @@ Game.prototype.onConnect = function(sessionId){
   this.sendFrame(sessionId, {
     type: shared.Events.BOOTSTRAP,
     senderSessionId: 0,
-    data: shared.Serializer.serialize({
-      state: this.state,
-      sessionId: sessionId
-    })
+    data: { state: this.state, sessionId: sessionId }
   });
   this.fireEvent({
     type: shared.Events.NEW_SESSION,

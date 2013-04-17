@@ -13,9 +13,8 @@ var Game = function(socket){
 Game.prototype.onReceive = function(frame){
   switch(frame.type){
     case tapio.Events.BOOTSTRAP:
-      var data = tapio.Serializer.deserialize(frame.data);
-      this.state = data.state;
-      this.sessionId = data.sessionId;
+      this.state = frame.data.state;
+      this.sessionId = frame.data.sessionId;
       this.start();
       break;
     case tapio.Events.PING:

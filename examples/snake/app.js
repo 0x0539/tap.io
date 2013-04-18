@@ -13,10 +13,11 @@ var getInitialState = function(){
   var state = {};
   state.random = new tapio.Random(Math.floor(Math.random() * 100));
   state.food = [];
+  state.players = {};
   return state;
 };
 
 app.addResource('/', indexHtmlResource);
 app.addResource('/snake.js', snakeJsResource);
 
-app.start(8080, getInitialState(), new snake.Extension());
+app.start(8080, getInitialState(), new snake.SnakeExtension());

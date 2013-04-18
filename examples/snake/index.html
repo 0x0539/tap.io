@@ -8,9 +8,6 @@
     <script>
       $(function(){
         var socket = io.connect(window.location.origin);
-
-        // Set the engine to be used.
-        tapio.Engine.setExtension(new tapio.SnakeExtension());
         
         // Create the client Game object to get the system off and running.
         var game = new tapio.Game(socket);
@@ -40,14 +37,16 @@
 
         var SnakeRenderer = function(){}
         SnakeRenderer.prototype.render = function(sessionId, state){
-          for(var otherSessionId in state.players){
-            var player = state.players[otherSessionId];
+          context.clearRect(0, 0, 200, 200);
+          var engine = state.engine;
+          for(var otherSessionId in engine.players){
+            var player = engine.players[otherSessionId];
             if(player.snake){
               context.beginPath();
-              context.moveTo(player.snake.x, player.snake.y);
               var segments = player.snake.getSegments();
               for(var i = 0; i < segments.length; i++){
                 var segment = segments[i];
+                context.moveTo(segment.x1, segment.y1);
                 context.lineTo(segment.x2, segment.y2);
               }
               context.stroke();

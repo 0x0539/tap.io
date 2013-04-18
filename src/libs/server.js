@@ -127,20 +127,23 @@ Network.prototype.send = function(sessionId, frame){
  * Contains all the interesting logic pertaining to event 
  * broadcasting, security, etc.
  */
-var Game = function(network, state){
+var Game = function(network, engine){
   var dis = this;
 
   if(network == null)
     throw new Error('network is a required argument');
+  if(engine == null)
+    throw new Error('engine is a required argument');
 
   this.network = network;
 
   // game data
-  this.state = state || {};
+  this.state = {};
   this.state.clock = 0;
   this.state.vt = 0;
   this.state.events = [];
   this.state.sessionIds = [0];
+  this.state.engine = engine;
 
   // disconnect all non-server users because nobody is connected right now
   for(var i = 0; i < this.state.sessionIds.length; i++){

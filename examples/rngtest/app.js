@@ -7,12 +7,11 @@ var indexHtmlResource = new tapio.FileResource(__dirname + '/index.html', 'text/
 // Configure the extension JS for serving.
 var extensionJsResource = new tapio.JsResource(new tapio.FileResource(__dirname + '/extension.js'));
 
-// Configure initial shared state with a random number generator.
-var state = {random: new tapio.Random(3)};
-
 app.addResource('/', indexHtmlResource);
 app.addResource('/extension.js', extensionJsResource);
 
-var MinimalExtension = require('./extension.js').MinimalExtension;
+var extension = require('./extension.js');
 
-app.start(8080, state, new MinimalExtension());
+console.log(new extension.RngExtension());
+
+app.start(8080, new extension.RngExtension());

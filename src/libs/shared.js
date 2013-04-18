@@ -3,7 +3,8 @@ Cloner.prototype.clone = function(object){
   return exports.Serializer.deserialize(exports.Serializer.serialize(object));
 };
 
-var Events = function(){
+// Singleton events object.
+var Events = new (function(){
   // All custom events should use this type.
   this.CUSTOM = 'CustomEvent';
 
@@ -16,14 +17,9 @@ var Events = function(){
   this.PING = 'PingEvent';
   this.PONG = 'PongEvent';
   this.BOOTSTRAP = 'Bootstrap';
-};
+})();
 
-var Engine = function(){
-  this.extension = null;
-};
-Engine.prototype.setExtension = function(extension){
-  this.extension = extension;
-};
+var Engine = function(){};
 Engine.prototype.calculateSafeZone = function(state){
   var safeZone = {};
 
@@ -73,8 +69,7 @@ Engine.prototype.advanceTo = function(state, endVt){
   for(; state.vt < endVt; state.vt++){
 
     // handle physics at current vt
-    if(this.extension)
-      this.extension.update(state);
+    state.engine.update(state);
 
     // handle events at current vt
     while(state.events.length > 0 && state.events[0].vt == state.vt)
@@ -94,12 +89,11 @@ Engine.prototype.handle = function(state, event){
       state.sessionIds.sort();
       break;
     case Events.END_SESSION:
-      state.sessionIds = Utilities.spliceOut(state.sessionIds, event.data.sessionId);
+      state.sessionIds = exports.Utilities.spliceOut(state.sessionIds, event.data.sessionId);
       break;
   }
 
-  if(this.extension)
-    this.extension.handle(state, event);
+  state.engine.handle(state, event);
 };
 Engine.prototype.validate = function(state, event){
   if(event.vt == null)
@@ -128,8 +122,7 @@ Engine.prototype.validate = function(state, event){
     default:
       throw new Error('invalid event type');
   }
-  if(this.extension)
-    this.extension.validate(state, event);
+  state.engine.validate(state, event);
 };
 
 var Parameters = function(){
@@ -436,9 +429,9 @@ Utilities.prototype.ticks2ms = function(ticks, ratio){
 };
 
 exports.Cloner = new Cloner();
-exports.Events = new Events();
 exports.Engine = new Engine();
 exports.Parameters = new Parameters();
+exports.Events = Events;
 exports.Random = Random;
 exports.Serializer = new Serializer();
 exports.Utilities = new Utilities();

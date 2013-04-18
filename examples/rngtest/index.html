@@ -7,9 +7,6 @@
     <script>
       var socket = io.connect(window.location.origin);
 
-      // Set the engine to be used.
-      tapio.Engine.setExtension(new tapio.MinimalExtension());
-      
       // Create the client Game object to get the system off and running.
       var game = new tapio.Game(socket);
     </script>

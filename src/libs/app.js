@@ -84,7 +84,7 @@ App.prototype.forAllResources = function(callback){
   for (var i = 0; i < this.resourcesInOrder.length; i++)
     callback(this.resourcesInOrder[i]);
 };
-App.prototype.start = function(port, state, extension){
+App.prototype.start = function(port, engine){
   var dis = this;
 
   var httpServer = require('http').createServer(function(req, res){
@@ -93,13 +93,10 @@ App.prototype.start = function(port, state, extension){
 
   httpServer.listen(port);
 
-  if(extension)
-    shared.Engine.setExtension(extension);
-
   var network = new server.Network(httpServer);
   network.start();
 
-  var game = new server.Game(network, state);
+  var game = new server.Game(network, engine);
   game.start();
 
   return game;

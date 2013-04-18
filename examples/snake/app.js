@@ -1,14 +1,25 @@
+// Create the tap.io app instance.
 var tapio = require('tap.io');
-var snake = require('./snake.js');
-
 var app = new tapio.App();
 
-// Configure the client HTML page for serving.
-var indexHtmlResource = new tapio.FileResource(__dirname + '/index.html', 'text/html');
-// Configure the snake JS for serving.
-var snakeJsResource = new tapio.JsResource(new tapio.FileResource(__dirname + '/snake.js'));
+// Read the files we need to serve.
+var fs = require('fs');
+var snakeJs = app.wrapJs(fs.readFileSync(__dirname + '/snake.js'));
 
-app.addResource('/', indexHtmlResource);
-app.addResource('/snake.js', snakeJsResource);
+// Set up express server.
+var express = require('express')();
+express.get('/shared.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getSharedJs()); });
+express.get('/client.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getClientJs()); });
+express.get('/',          function(req, res){ res.sendfile(__dirname + '/index.html'); });
+express.get('/snake.js',  function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(snakeJs); });
 
-app.start(8080, new snake.SnakeEngine());
+// Set up HTTP server.
+var server = require('http').createServer(express);
+server.listen(8080);
+
+// Set up game engine.
+var snake = require('./snake.js');
+var engine = new snake.SnakeEngine();
+
+// Start server
+app.start(server, engine);

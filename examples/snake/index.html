@@ -35,23 +35,44 @@
         var canvas = document.getElementById('snakecanvas');
         var context = canvas.getContext('2d');
 
+        $(canvas).attr('width', tapio.SnakeParameters.MAX_X)
+            .attr('height', tapio.SnakeParameters.MAX_Y);
+
         var SnakeRenderer = function(){}
         SnakeRenderer.prototype.render = function(sessionId, state){
-          context.clearRect(0, 0, 200, 200);
+          context.clearRect(0, 0, tapio.SnakeParameters.MAX_X, tapio.SnakeParameters.MAX_Y);
           var engine = state.engine;
           for(var otherSessionId in engine.players){
-            var player = engine.players[otherSessionId];
-            if(player.snake){
-              context.beginPath();
-              var segments = player.snake.getSegments();
-              for(var i = 0; i < segments.length; i++){
-                var segment = segments[i];
-                context.moveTo(segment.x1, segment.y1);
-                context.lineTo(segment.x2, segment.y2);
-              }
-              context.stroke();
-            }
+            this.drawPlayer(engine.players[otherSessionId]);
           }
+          for(var f = 0; f < engine.food.length; f++){
+            this.drawFood(engine.food[f]);
+          }
+          if(engine.players[sessionId].isDead()) {
+            $('#deathmessage').html('Press r to respawn');
+          } else {
+            $('#deathmessage').html('');
+          }
+        };
+        SnakeRenderer.prototype.drawPlayer = function(player){
+          if(player.snake == null)
+            return;
+          context.beginPath();
+          context.lineWidth = tapio.SnakeParameters.SNAKE_WIDTH;
+          context.strokeStyle = 'blue';
+          var segments = player.snake.getSegments();
+          for(var i = 0; i < segments.length; i++){
+            var segment = segments[i];
+            context.moveTo(segment.x1, segment.y1);
+            context.lineTo(segment.x2, segment.y2);
+          }
+          context.stroke();
+        };
+        SnakeRenderer.prototype.drawFood = function(food){
+          context.beginPath();
+          context.arc(food.x, food.y, tapio.SnakeParameters.FOOD_RADIUS, 0, 2 * Math.PI, false);
+          context.fillStyle = 'green';
+          context.fill();
         };
 
         var renderLoop = new tapio.RenderLoop(game, new SnakeRenderer());
@@ -59,6 +80,7 @@
     </script>
   </head>
   <body>
-    <canvas id="snakecanvas" height="200" width="200"></canvas>
+    <canvas id="snakecanvas"></canvas>
+    <p id="deathmessage"></p>
   </body>
 </html>

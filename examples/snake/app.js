@@ -8,10 +8,9 @@ var snakeJs = app.wrapJs(fs.readFileSync(__dirname + '/snake.js'));
 
 // Set up express server.
 var express = require('express')();
-express.get('/shared.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getSharedJs()); });
-express.get('/client.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getClientJs()); });
-express.get('/',          function(req, res){ res.sendfile(__dirname + '/index.html'); });
-express.get('/snake.js',  function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(snakeJs); });
+express.get('/tap.js',   function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getTapJs()); });
+express.get('/',         function(req, res){ res.sendfile(__dirname + '/index.html'); });
+express.get('/snake.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(snakeJs); });
 
 // Set up HTTP server.
 var server = require('http').createServer(express);

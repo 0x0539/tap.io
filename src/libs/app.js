@@ -5,15 +5,15 @@ var Network = require('./server.js').Network;
 var Game = require('./server.js').Game;
 
 var App = function(){
-  this.sharedJs = null;
-  this.clientJs = null;
-  this.wrapperJs = null;
+  this.wrapperJs = fs.readFileSync(__dirname + '/wrapper.js.ejs');
+
+  this.tapJs = [
+    this.wrapJs(fs.readFileSync(__dirname + '/shared.js')),
+    this.wrapJs(fs.readFileSync(__dirname + '/client.js'))
+  ].join('\n\n');
+
   this.network = null;
   this.game = null;
-};
-App.prototype.wrapJs = function(js){
-  this.wrapperJs = this.wrapperJs || fs.readFileSync(__dirname + '/wrapper.js.ejs');
-  return ejs.render(this.wrapperJs.toString(), {js: js});
 };
 App.prototype.start = function(server, engine){
   this.network = new Network(server);
@@ -21,13 +21,11 @@ App.prototype.start = function(server, engine){
   this.game = new Game(this.network, engine);
   this.game.start();
 };
-App.prototype.getSharedJs = function() {
-  this.sharedJs = this.sharedJs || this.wrapJs(fs.readFileSync(__dirname + '/shared.js'));
-  return this.sharedJs;
+App.prototype.wrapJs = function(js){
+  return ejs.render(this.wrapperJs.toString(), {js: js});
 };
-App.prototype.getClientJs = function() {
-  this.clientJs = this.clientJs || this.wrapJs(fs.readFileSync(__dirname + '/client.js'));
-  return this.clientJs;
+App.prototype.getTapJs = function() {
+  return this.tapJs;
 };
 
 exports.App = App;

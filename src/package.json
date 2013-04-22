@@ -1,6 +1,6 @@
 {
   "name": "tap.io",
-  "version": "0.0.0-38",
+  "version": "0.0.0-39",
   "main": "tap",
   "description": "A Node.js platform for building distributed real-time systems with browser-based clients.",
   "author": {

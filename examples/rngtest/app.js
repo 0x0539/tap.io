@@ -8,8 +8,7 @@ var extensionJs = app.wrapJs(fs.readFileSync(__dirname + '/extension.js'));
 
 // Set up express server.
 var express = require('express')();
-express.get('/shared.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getSharedJs()); });
-express.get('/client.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getClientJs()); });
+express.get('/tap.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(app.getTapJs()); });
 express.get('/', function(req, res){ res.sendfile(__dirname + '/index.html'); });
 express.get('/extension.js', function(req, res){ res.set('Content-Type', 'text/javascript'); res.send(extensionJs); });
 

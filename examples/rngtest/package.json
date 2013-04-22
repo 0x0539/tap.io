@@ -1,0 +1,24 @@
+{
+  "name": "rngtest.tap.io",
+  "version": "0.0.0-1",
+  "main": "rngtest",
+  "description": "A simple RNG test application for tap.io.",
+  "author": {
+    "name": "Sebastian Goodman"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/0x0539/tap.io"
+  },
+  "scripts": {
+    "start": "app.js"
+  },
+  "engines": {
+    "node": "0.8.x"
+  },
+  "dependencies": {
+    "tap.io": "*",
+    "express": "*"
+  }
+}

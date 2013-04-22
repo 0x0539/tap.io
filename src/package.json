@@ -1,6 +1,6 @@
 {
   "name": "tap.io",
-  "version": "0.0.0-39",
+  "version": "0.0.0-40",
   "main": "tap",
   "description": "A Node.js platform for building distributed real-time systems with browser-based clients.",
   "author": {
@@ -12,9 +12,6 @@
     "url": "git@github.com/0x0539/tap.io"
   },
   "subdomain": "bumbleskunk.tap.io",
-  "scripts": {
-    "start": "example/minimal/app.js"
-  },
   "engines": {
     "node": "0.8.x"
   },

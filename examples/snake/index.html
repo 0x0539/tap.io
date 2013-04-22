@@ -48,9 +48,9 @@
             this.drawFood(engine.food[f]);
           }
           if(engine.players[sessionId].isDead()) {
-            $('#deathmessage').html('Press r to respawn');
+            document.title = 'Press R to respawn';
           } else {
-            $('#deathmessage').html('');
+            document.title = 'Welcome to Snake';
           }
         };
         SnakeRenderer.prototype.drawPlayer = function(player){
@@ -77,9 +77,18 @@
         var renderLoop = new tapio.RenderLoop(game, new SnakeRenderer());
       });
     </script>
+    <style type="text/css">
+      #snakecanvas {
+        padding-left: 0px;
+        padding-right: 0px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        border: 2px solid black;
+      };
+    </style>
   </head>
   <body>
     <canvas id="snakecanvas"></canvas>
-    <p id="deathmessage"></p>
   </body>
 </html>
